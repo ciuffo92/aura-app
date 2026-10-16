@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Aura - Zyklus- & Gesundheitstracker</title>
-    <!-- App für iPhone / iOS -->
-    <meta name="theme-color" content="#FDF8F5">
+    <title>Aura - Menstruationszyklus & Eisprung-Tracker</title>
+    <!-- Home-Bildschirm-Web-App (iPhone) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Aura">
     <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#FDF8F5">
 
-    <!-- CDNs für Styling & Diagramme -->
+    <!-- Bibliotheken & CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -53,17 +53,30 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
         }
         .font-serif {
             font-family: 'Playfair Display', serif;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(253, 164, 175, 0.25);
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FAF4EF;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #fda4af;
+            border-radius: 9999px;
+        }
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+        button, a, label, input, select {
+            touch-action: manipulation;
+        }
+        button {
+            -webkit-user-select: none;
+            user-select: none;
         }
         input, select, textarea {
             font-size: 16px !important;
@@ -73,42 +86,51 @@
             appearance: none;
             min-height: 48px;
             background-color: #fff;
-            color: #4A2E35;
             text-align: left;
         }
-        .safe-top { padding-top: env(safe-area-inset-top); }
-        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-        @media (max-width: 767px) {
-            .mobile-tabbar-spacer {
-                padding-bottom: calc(76px + env(safe-area-inset-bottom));
-            }
+        .safe-top {
+            padding-top: env(safe-area-inset-top);
+        }
+        .safe-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .mobile-nav-spacer {
+            height: calc(4.5rem + env(safe-area-inset-bottom));
         }
         .modal-sheet {
-            max-height: calc(100dvh - env(safe-area-inset-top) - 16px);
+            max-height: calc(100dvh - env(safe-area-inset-top) - 1rem);
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
         }
-        .no-scroll { overflow: hidden; }
+        @media (min-width: 640px) {
+            .modal-sheet {
+                padding-bottom: 2rem;
+            }
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(253, 164, 175, 0.2);
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between antialiased mobile-tabbar-spacer">
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-rose-200 selection:text-rose-900">
 
-    <!-- Header / Kopfzeile -->
-    <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-rose-100/60 shadow-sm safe-top">
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-rose-100/60 shadow-sm safe-top">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Logo -->
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-400 to-rose-300 flex items-center justify-center text-white shadow-md shadow-rose-200">
                         <i data-lucide="sparkles" class="w-5 h-5"></i>
                     </div>
                     <div>
                         <span class="font-serif text-2xl font-bold tracking-tight text-plum">Aura</span>
-                        <span class="hidden sm:inline text-xs font-semibold px-2 py-0.5 ml-2 bg-rose-100 text-rose-700 rounded-full uppercase tracking-wider">Zyklustracker</span>
+                        <span class="hidden sm:inline text-xs font-semibold px-2 py-0.5 ml-2 bg-rose-100 text-rose-700 rounded-full uppercase tracking-wider">Zyklus &amp; Gesundheit</span>
                     </div>
                 </div>
 
-                <!-- Navigation Desktop -->
                 <nav class="hidden md:flex space-x-1 bg-cream/80 p-1.5 rounded-2xl border border-rose-100">
                     <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-tab px-5 py-2.5 rounded-xl text-sm font-medium transition-all bg-white text-rose-600 shadow-sm flex items-center gap-2">
                         <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Übersicht
@@ -117,21 +139,20 @@
                         <i data-lucide="calendar" class="w-4 h-4"></i> Kalender
                     </button>
                     <button onclick="switchTab('stats')" id="nav-stats" class="nav-tab px-5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-600 hover:text-rose-600 flex items-center gap-2">
-                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Statistik
+                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Statistiken
                     </button>
                     <button onclick="switchTab('nutrition')" id="nav-nutrition" class="nav-tab px-5 py-2.5 rounded-xl text-sm font-medium transition-all text-slate-600 hover:text-rose-600 flex items-center gap-2">
-                        <i data-lucide="apple" class="w-4 h-4"></i> Ernährung
+                        <i data-lucide="apple" class="w-4 h-4"></i> Ernährungstipps
                     </button>
                 </nav>
 
-                <!-- Aktionen -->
                 <div class="flex items-center gap-2">
-                    <button onclick="openLogModal()" class="flex items-center justify-center gap-2 min-w-[44px] min-h-[44px] bg-gradient-to-r from-rose-500 to-rose-400 text-white font-medium px-3 sm:px-4 py-2.5 rounded-xl text-sm shadow-md shadow-rose-200">
-                        <i data-lucide="plus-circle" class="w-5 h-5 sm:w-4 sm:h-4"></i>
-                        <span class="hidden sm:inline">Periode eintragen</span>
+                    <button onclick="openLogModal()" class="flex items-center justify-center gap-2 bg-gradient-to-r from-rose-500 to-rose-400 hover:from-rose-600 hover:to-rose-500 text-white font-semibold min-h-[44px] px-4 py-2.5 rounded-xl text-sm shadow-md shadow-rose-200 transition-all hover:scale-[1.02] active:scale-[0.96]">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        <span class="hidden min-[380px]:inline">Eintragen</span>
                     </button>
-                    <button onclick="openSettingsModal()" class="min-w-[44px] min-h-[44px] p-2.5 text-slate-500 hover:text-rose-600 rounded-xl" title="Einstellungen">
-                        <i data-lucide="settings" class="w-5 h-5"></i>
+                    <button onclick="openSettingsModal()" class="w-11 h-11 flex items-center justify-center text-slate-500 hover:text-rose-600 hover:bg-rose-50 active:bg-rose-100 rounded-xl transition-all" title="Einstellungen">
+                        <i data-lucide="settings" class="w-6 h-6"></i>
                     </button>
                 </div>
             </div>
@@ -139,24 +160,22 @@
     </header>
 
     <!-- Hauptinhalt -->
-    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-10 flex-grow w-full">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex-grow w-full">
 
         <!-- TAB 1: ÜBERSICHT -->
-        <section id="tab-dashboard" class="tab-content space-y-5 sm:space-y-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-                <!-- Hauptkarte Zyklusstatus -->
-                <div class="lg:col-span-2 glass-card rounded-3xl p-5 sm:p-8 relative overflow-hidden flex flex-col justify-between shadow-sm">
+        <section id="tab-dashboard" class="tab-content space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden flex flex-col justify-between shadow-sm">
                     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                         <div>
-                            <span class="text-xs uppercase font-bold tracking-wider text-rose-500 bg-rose-50 px-3 py-1 rounded-full border border-rose-100">Live Tracker</span>
+                            <span class="text-xs uppercase font-bold tracking-wider text-rose-500 bg-rose-50 px-3 py-1 rounded-full border border-rose-100">Live-Zyklustracking</span>
                             <h2 class="text-2xl sm:text-3xl font-serif font-bold text-plum mt-2">Aktueller Zyklusstatus</h2>
                         </div>
                         <span id="current-date-badge" class="text-xs font-semibold text-slate-500 bg-white/80 px-3 py-1.5 rounded-xl border border-slate-100 shadow-sm">Heute</span>
                     </div>
 
-                    <!-- Zyklus Fortschritts-Kreis -->
                     <div class="flex flex-col sm:flex-row items-center justify-around gap-8 my-4">
-                        <div class="relative w-44 h-44 sm:w-48 sm:h-48 flex items-center justify-center">
+                        <div class="relative w-48 h-48 flex items-center justify-center">
                             <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                                 <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="8" class="text-rose-100" fill="transparent"></circle>
                                 <circle id="cycle-progress-circle" cx="50" cy="50" r="42" stroke="currentColor" stroke-width="8" class="text-rose-500 transition-all duration-1000 ease-out" fill="transparent" stroke-dasharray="263.89" stroke-dashoffset="130" stroke-linecap="round"></circle>
@@ -167,7 +186,6 @@
                             </div>
                         </div>
 
-                        <!-- Info Phasen -->
                         <div class="space-y-4 w-full sm:w-auto">
                             <div class="bg-white/90 p-4 rounded-2xl border border-rose-100 shadow-sm flex items-center gap-4">
                                 <div id="phase-icon-bg" class="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 flex-shrink-0">
@@ -175,8 +193,8 @@
                                 </div>
                                 <div>
                                     <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Aktuelle Phase</div>
-                                    <div id="current-phase-name" class="text-lg font-bold text-plum">Menstruation</div>
-                                    <p id="current-phase-desc" class="text-xs text-slate-500 mt-0.5">Körperliche Ruhe, Erneuerung und Eisenbedarf.</p>
+                                    <div id="current-phase-name" class="text-lg font-bold text-plum">Menstruationsphase</div>
+                                    <p id="current-phase-desc" class="text-xs text-slate-500 mt-0.5">Gebärmutterschleimhaut wird abgebaut. Zeit für Ruhe &amp; Erholung.</p>
                                 </div>
                             </div>
 
@@ -195,16 +213,14 @@
                         </div>
                     </div>
 
-                    <!-- Tipp des Tages -->
                     <div id="dashboard-phase-tip" class="mt-4 bg-rose-500/10 border border-rose-200/50 rounded-2xl p-4 flex items-center gap-3 text-xs sm:text-sm text-plum">
                         <i data-lucide="sparkles" class="w-5 h-5 text-rose-500 flex-shrink-0"></i>
-                        <span id="phase-quick-tip">Eisenreiche Nahrungsmittel und Vitamin C unterstützen die Regeneration.</span>
+                        <span id="phase-quick-tip">Setze auf eisenreiche Nahrungsmittel in Kombination mit Vitamin C.</span>
                     </div>
                 </div>
 
-                <!-- Rechter Bereich: Statistik Schnellübersicht -->
-                <div class="space-y-5 sm:space-y-6">
-                    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-rose-100 shadow-sm space-y-4">
+                <div class="space-y-6">
+                    <div class="bg-white rounded-3xl p-6 border border-rose-100 shadow-sm flex flex-col justify-between space-y-4">
                         <h3 class="font-serif font-bold text-lg text-plum flex items-center justify-between">
                             <span>Zyklus-Kennzahlen</span>
                             <i data-lucide="activity" class="w-4 h-4 text-rose-400"></i>
@@ -212,42 +228,40 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-cream p-4 rounded-2xl text-center">
                                 <span class="text-2xl font-bold font-serif text-plum block" id="avg-cycle-dash">28</span>
-                                <span class="text-xs text-slate-500 font-medium">Ø Zyklus (Tage)</span>
+                                <span class="text-xs text-slate-500 font-medium">Ø Zykluslänge (Tage)</span>
                             </div>
                             <div class="bg-cream p-4 rounded-2xl text-center">
                                 <span class="text-2xl font-bold font-serif text-plum block" id="avg-period-dash">5</span>
-                                <span class="text-xs text-slate-500 font-medium">Ø Blutung (Tage)</span>
+                                <span class="text-xs text-slate-500 font-medium">Ø Blutungsdauer (Tage)</span>
                             </div>
                         </div>
                         <div class="bg-emerald-50 border border-emerald-100 p-3.5 rounded-2xl flex items-center gap-3">
                             <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
                             <div>
-                                <div id="regularity-status" class="text-xs font-bold text-emerald-800">Sehr Regelmäßig</div>
-                                <div id="regularity-desc" class="text-[11px] text-emerald-700">Minimale Abweichungen.</div>
+                                <div id="regularity-status" class="text-xs font-bold text-emerald-800">Sehr regelmäßiger Zyklus</div>
+                                <div id="regularity-desc" class="text-[11px] text-emerald-700">Geringe Abweichung.</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Ernährungstipp Teaser -->
                     <div class="bg-gradient-to-br from-plum to-slate-900 text-white rounded-3xl p-6 shadow-md relative overflow-hidden">
                         <div class="relative z-10 space-y-3">
-                            <span class="text-[10px] font-bold tracking-widest uppercase bg-white/20 text-rose-200 px-2.5 py-1 rounded-full inline-block">Ernährungsempfehlung</span>
-                            <h4 id="spotlight-title" class="text-lg font-serif font-bold">Ernährung während der Menstruation</h4>
-                            <p id="spotlight-desc" class="text-xs text-rose-100/80 leading-relaxed">Kombiniere eisenreiche Lebensmittel mit Vitamin C für eine optimale Aufnahme im Körper.</p>
-                            <button onclick="switchTab('nutrition')" class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-300 hover:text-white transition-colors">
-                                Zum Ernährungsratgeber <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                            <span class="text-[10px] font-bold tracking-widest uppercase bg-white/20 text-rose-200 px-2.5 py-1 rounded-full inline-block">Ernährungs-Empfehlung</span>
+                            <h4 id="spotlight-title" class="text-lg font-serif font-bold">Power für die Menstruation</h4>
+                            <p id="spotlight-desc" class="text-xs text-rose-100/80 leading-relaxed">Kombiniere eisenreiche Lebensmittel mit Vitamin C, um die Aufnahme zu unterstützen.</p>
+                            <button onclick="switchTab('nutrition')" class="inline-flex items-center gap-1.5 min-h-[44px] text-sm font-semibold text-rose-300 hover:text-white transition-colors">
+                                Zum Ernährungsguide <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Vergangene Einträge -->
-            <div class="bg-white rounded-3xl p-4 sm:p-6 border border-rose-100 shadow-sm">
-                <div class="flex items-center justify-between gap-2 mb-4">
-                    <h3 class="font-serif font-bold text-lg sm:text-xl text-plum">Letzte Einträge</h3>
-                    <button onclick="openLogModal()" class="px-3 rounded-xl text-xs font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1">
-                        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Neu eintragen
+            <div class="bg-white rounded-3xl p-6 border border-rose-100 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h3 class="font-serif font-bold text-xl text-plum">Verlauf der letzten Perioden</h3>
+                    <button onclick="openLogModal()" class="min-h-[44px] px-4 rounded-xl bg-rose-50 active:bg-rose-100 text-sm font-semibold text-rose-600 flex items-center gap-1.5">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Neuer Eintrag
                     </button>
                 </div>
                 <ul id="dashboard-logs-list" class="sm:hidden divide-y divide-rose-50"></ul>
@@ -259,7 +273,7 @@
                                 <th class="p-3.5">Enddatum</th>
                                 <th class="p-3.5">Blutungsdauer</th>
                                 <th class="p-3.5">Zykluslänge</th>
-                                <th class="p-3.5 text-right rounded-r-xl">Aktion</th>
+                                <th class="p-3.5 text-right rounded-r-xl">Aktionen</th>
                             </tr>
                         </thead>
                         <tbody id="dashboard-logs-tbody" class="divide-y divide-rose-50"></tbody>
@@ -273,41 +287,41 @@
             <div class="bg-white rounded-3xl p-3 sm:p-8 border border-rose-100 shadow-sm">
                 <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
                     <div class="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
-                        <button onclick="changeMonth(-1)" class="flex items-center justify-center w-11 h-11 hover:bg-rose-50 rounded-xl border border-slate-200">
+                        <button onclick="changeMonth(-1)" class="w-12 h-12 flex items-center justify-center hover:bg-rose-50 rounded-xl border border-slate-200">
                             <i data-lucide="chevron-left" class="w-5 h-5 text-slate-600"></i>
                         </button>
                         <h2 id="calendar-month-year" class="text-xl sm:text-2xl font-serif font-bold text-plum text-center">Monat Jahr</h2>
-                        <button onclick="changeMonth(1)" class="flex items-center justify-center w-11 h-11 hover:bg-rose-50 rounded-xl border border-slate-200">
+                        <button onclick="changeMonth(1)" class="w-12 h-12 flex items-center justify-center hover:bg-rose-50 rounded-xl border border-slate-200">
                             <i data-lucide="chevron-right" class="w-5 h-5 text-slate-600"></i>
                         </button>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-slate-600">
                         <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-rose-500"></span> Periode</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-rose-200 border border-rose-400 border-dashed"></span> Prognose</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-purple-600"></span> Eisprung</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-rose-200 border border-rose-400 border-dashed"></span> Vorhergesagt</div>
+                        <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-purple-500"></span> Eisprung</div>
                         <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-purple-100 border border-purple-300"></span> Fruchtbar</div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs font-bold text-slate-400 uppercase">
+                <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs font-bold text-slate-400 uppercase tracking-wider py-2">
                     <div>So</div><div>Mo</div><div>Di</div><div>Mi</div><div>Do</div><div>Fr</div><div>Sa</div>
                 </div>
                 <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 sm:gap-2 text-sm"></div>
             </div>
         </section>
 
-        <!-- TAB 3: STATISTIK -->
+        <!-- TAB 3: STATISTIKEN -->
         <section id="tab-stats" class="tab-content hidden space-y-6">
-            <div class="bg-white rounded-3xl p-4 sm:p-8 border border-rose-100 shadow-sm space-y-6">
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-rose-50 pb-6">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-rose-100 shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-rose-50 pb-6">
                     <div>
                         <h2 class="text-2xl font-serif font-bold text-plum">Zykluslängen-Analyse</h2>
-                        <p class="text-xs text-slate-500 mt-1">Verlauf und Vergleiche der letzten Monate im gesunden Bereich (21–35 Tage).</p>
+                        <p class="text-xs text-slate-500 mt-1">Überwache Regelmäßigkeit und Schwankungen im Vergleich zum Normbereich (21–35 Tage).</p>
                     </div>
-                    <div class="flex p-1 bg-cream rounded-2xl border border-rose-100 text-xs font-semibold">
-                        <button id="timeframe-6m" onclick="setTimeframe(6)" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-white text-rose-600 shadow-sm">6 Monate</button>
-                        <button id="timeframe-1y" onclick="setTimeframe(12)" class="flex-1 sm:flex-none px-4 py-2 rounded-xl text-slate-600 hover:text-rose-600">1 Jahr</button>
+                    <div class="flex w-full sm:w-auto sm:inline-flex p-1 bg-cream rounded-2xl border border-rose-100 text-sm font-semibold">
+                        <button id="timeframe-6m" onclick="setTimeframe(6)" class="flex-1 sm:flex-none min-h-[44px] px-4 py-2 rounded-xl transition-all bg-white text-rose-600 shadow-sm">6 Monate</button>
+                        <button id="timeframe-1y" onclick="setTimeframe(12)" class="flex-1 sm:flex-none min-h-[44px] px-4 py-2 rounded-xl transition-all text-slate-600 hover:text-rose-600">1 Jahr</button>
                     </div>
                 </div>
 
@@ -321,12 +335,12 @@
                         <div class="text-2xl font-bold font-serif text-plum mt-1" id="chart-avg-bleed">5 Tage</div>
                     </div>
                     <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-100">
-                        <span class="text-xs text-slate-500 font-medium">Abweichung</span>
+                        <span class="text-xs text-slate-500 font-medium">Zyklusschwankung</span>
                         <div class="text-2xl font-bold font-serif text-plum mt-1" id="chart-variation">±2 Tage</div>
                     </div>
                 </div>
 
-                <div class="w-full h-64 sm:h-96 relative pt-4">
+                <div class="w-full h-72 sm:h-96 relative pt-4">
                     <canvas id="cycleChart"></canvas>
                 </div>
             </div>
@@ -334,17 +348,17 @@
 
         <!-- TAB 4: ERNÄHRUNG -->
         <section id="tab-nutrition" class="tab-content hidden space-y-6">
-            <div class="bg-white rounded-3xl p-4 sm:p-8 border border-rose-100 shadow-sm space-y-6">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-rose-100 shadow-sm space-y-6">
                 <div>
-                    <h2 class="text-2xl font-serif font-bold text-plum">Ernährung & Gesundheit nach Phasen</h2>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Gezielte Nährstoffe für jede Phase deines hormonellen Zyklus.</p>
+                    <h2 class="text-2xl font-serif font-bold text-plum">Phasenspezifische Ernährung &amp; Gesundheit</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Versorge deinen Körper in jeder Phase mit den optimalen Nährstoffen.</p>
                 </div>
 
                 <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 border-b border-rose-100 pb-4">
-                    <button onclick="filterNutritionPhase('menstruation')" id="nut-btn-menstruation" class="nut-tab-btn px-4 py-2 rounded-xl text-sm font-semibold bg-rose-500 text-white shadow-md">Menstruationsphase</button>
-                    <button onclick="filterNutritionPhase('follicular')" id="nut-btn-follicular" class="nut-tab-btn px-4 py-2 rounded-xl text-sm font-semibold bg-cream text-slate-600">Follikelphase</button>
-                    <button onclick="filterNutritionPhase('ovulation')" id="nut-btn-ovulation" class="nut-tab-btn px-4 py-2 rounded-xl text-sm font-semibold bg-cream text-slate-600">Eisprung (Ovulation)</button>
-                    <button onclick="filterNutritionPhase('luteal')" id="nut-btn-luteal" class="nut-tab-btn px-4 py-2 rounded-xl text-sm font-semibold bg-cream text-slate-600">Lutealphase</button>
+                    <button onclick="filterNutritionPhase('menstruation')" id="nut-btn-menstruation" class="nut-tab-btn min-h-[48px] px-4 py-2 rounded-xl text-sm font-semibold bg-rose-500 text-white shadow-md">Menstruationsphase</button>
+                    <button onclick="filterNutritionPhase('follicular')" id="nut-btn-follicular" class="nut-tab-btn min-h-[48px] px-4 py-2 rounded-xl text-sm font-semibold bg-cream text-slate-600">Follikelphase</button>
+                    <button onclick="filterNutritionPhase('ovulation')" id="nut-btn-ovulation" class="nut-tab-btn min-h-[48px] px-4 py-2 rounded-xl text-sm font-semibold bg-cream text-slate-600">Eisprungphase</button>
+                    <button onclick="filterNutritionPhase('luteal')" id="nut-btn-luteal" class="nut-tab-btn min-h-[48px] px-4 py-2 rounded-xl text-sm font-semibold bg-cream text-slate-600">Lutealphase</button>
                 </div>
 
                 <div id="nutrition-content-box" class="space-y-6"></div>
@@ -353,46 +367,49 @@
 
     </main>
 
-    <!-- Footer / Fußzeile -->
-    <footer class="bg-white border-t border-rose-100 py-6 mt-8 sm:mt-12">
+    <!-- Footer -->
+    <footer class="bg-white border-t border-rose-100 py-6 mt-12">
         <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400 space-y-2">
-            <p>© Aura - Zyklus- & Gesundheitstracker. Vertrauliche Speicherung direkt auf deinem Gerät.</p>
+            <p>© Aura Zyklus- &amp; Gesundheitstracker. Entwickelt für vertrauliches Tracking.</p>
         </div>
+        <div class="md:hidden mobile-nav-spacer"></div>
     </footer>
 
-    <!-- Mobile Navigation Unten -->
-    <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-rose-100 bg-white/95 backdrop-blur-md pt-1.5 flex justify-around safe-bottom">
-        <button onclick="switchTab('dashboard')" id="mobile-nav-dashboard" class="mobile-nav-tab flex-1 flex flex-col items-center justify-center min-h-[52px] text-[11px] font-semibold text-rose-600">
-            <i data-lucide="layout-dashboard" class="w-6 h-6 mb-0.5"></i> Übersicht
-        </button>
-        <button onclick="switchTab('calendar')" id="mobile-nav-calendar" class="mobile-nav-tab flex-1 flex flex-col items-center justify-center min-h-[52px] text-[11px] font-semibold text-slate-500">
-            <i data-lucide="calendar" class="w-6 h-6 mb-0.5"></i> Kalender
-        </button>
-        <button onclick="switchTab('stats')" id="mobile-nav-stats" class="mobile-nav-tab flex-1 flex flex-col items-center justify-center min-h-[52px] text-[11px] font-semibold text-slate-500">
-            <i data-lucide="bar-chart-3" class="w-6 h-6 mb-0.5"></i> Statistik
-        </button>
-        <button onclick="switchTab('nutrition')" id="mobile-nav-nutrition" class="mobile-nav-tab flex-1 flex flex-col items-center justify-center min-h-[52px] text-[11px] font-semibold text-slate-500">
-            <i data-lucide="apple" class="w-6 h-6 mb-0.5"></i> Ernährung
-        </button>
+    <!-- Mobile Navigationsleiste -->
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-rose-100 shadow-lg safe-bottom">
+        <div class="flex justify-around px-2 pt-1.5 pb-1.5">
+            <button onclick="switchTab('dashboard')" id="mobile-nav-dashboard" class="mobile-nav-tab flex-1 flex flex-col items-center justify-center gap-1 min-h-[56px] rounded-2xl text-[11px] font-semibold text-rose-600">
+                <i data-lucide="layout-dashboard" class="w-6 h-6"></i> Übersicht
+            </button>
+            <button onclick="switchTab('calendar')" id="mobile-nav-calendar" class="mobile-nav-tab flex-1 flex flex-col items-center justify-center gap-1 min-h-[56px] rounded-2xl text-[11px] font-semibold text-slate-500">
+                <i data-lucide="calendar" class="w-6 h-6"></i> Kalender
+            </button>
+            <button onclick="switchTab('stats')" id="mobile-nav-stats" class="mobile-nav-tab flex-1 flex flex-col items-center justify-center gap-1 min-h-[56px] rounded-2xl text-[11px] font-semibold text-slate-500">
+                <i data-lucide="bar-chart-3" class="w-6 h-6"></i> Statistik
+            </button>
+            <button onclick="switchTab('nutrition')" id="mobile-nav-nutrition" class="mobile-nav-tab flex-1 flex flex-col items-center justify-center gap-1 min-h-[56px] rounded-2xl text-[11px] font-semibold text-slate-500">
+                <i data-lucide="apple" class="w-6 h-6"></i> Ernährung
+            </button>
+        </div>
     </nav>
 
-    <!-- Modal Eintragen -->
-    <div id="log-modal" class="fixed inset-0 z-50 bg-plum/40 backdrop-blur-sm hidden flex items-end sm:items-center justify-center sm:p-4">
+    <!-- Modal Periode eintragen -->
+    <div id="log-modal" class="fixed inset-0 z-50 bg-plum/40 backdrop-blur-sm hidden flex items-end sm:items-center justify-center sm:p-4" onclick="if (event.target === this) closeLogModal()">
         <div class="modal-sheet bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-rose-100 relative">
-            <button onclick="closeLogModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
-            <h3 class="text-2xl font-serif font-bold text-plum mb-2">Periode eintragen</h3>
+            <button onclick="closeLogModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+            <h3 class="text-2xl font-serif font-bold text-plum mb-2">Periode erfassen</h3>
             <form id="log-period-form" onsubmit="handleSaveLog(event)" class="space-y-4 mt-4">
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Erster Tag der Blutung</label>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Startdatum der Periode</label>
                     <input type="date" id="input-start-date" required class="w-full px-4 py-3 rounded-xl border border-rose-200 text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Letzter Tag der Blutung</label>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Enddatum der Periode</label>
                     <input type="date" id="input-end-date" required class="w-full px-4 py-3 rounded-xl border border-rose-200 text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Notizen (Optional)</label>
-                    <input type="text" id="input-notes" placeholder="z. B. leichte Krämpfe, Stimmung..." class="w-full px-4 py-3 rounded-xl border border-rose-200 text-sm">
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Symptome &amp; Notizen (Optional)</label>
+                    <input type="text" id="input-notes" placeholder="z. B. leichte Krämpfe..." class="w-full px-4 py-3 rounded-xl border border-rose-200 text-sm">
                 </div>
                 <div class="flex gap-3 pt-4">
                     <button type="button" onclick="closeLogModal()" class="w-1/2 py-3 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold">Abbrechen</button>
@@ -403,9 +420,9 @@
     </div>
 
     <!-- Modal Einstellungen -->
-    <div id="settings-modal" class="fixed inset-0 z-50 bg-plum/40 backdrop-blur-sm hidden flex items-end sm:items-center justify-center sm:p-4">
+    <div id="settings-modal" class="fixed inset-0 z-50 bg-plum/40 backdrop-blur-sm hidden flex items-end sm:items-center justify-center sm:p-4" onclick="if (event.target === this) closeSettingsModal()">
         <div class="modal-sheet bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-rose-100 relative">
-            <button onclick="closeSettingsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <button onclick="closeSettingsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
             <h3 class="text-2xl font-serif font-bold text-plum mb-2">Einstellungen</h3>
             <form id="settings-form" onsubmit="handleSaveSettings(event)" class="space-y-4 mt-4">
                 <div>
@@ -413,12 +430,12 @@
                     <input type="number" id="input-default-cycle" min="20" max="45" required class="w-full px-4 py-3 rounded-xl border border-rose-200 text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Standard-Blutungsdauer (Tage)</label>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Standard-Periodendauer (Tage)</label>
                     <input type="number" id="input-default-bleed" min="2" max="10" required class="w-full px-4 py-3 rounded-xl border border-rose-200 text-sm">
                 </div>
                 <div class="border-t border-rose-100 pt-4 space-y-2">
-                    <button type="button" onclick="loadSampleData()" class="w-full py-2.5 rounded-xl border border-rose-300 text-rose-600 text-xs font-semibold">6-Monate Testdaten laden</button>
-                    <button type="button" onclick="clearAllData()" class="w-full py-2.5 rounded-xl border border-red-200 text-red-600 text-xs font-semibold">Alle Daten löschen</button>
+                    <button type="button" onclick="loadSampleData()" class="w-full py-2.5 rounded-xl border border-rose-300 text-rose-600 text-sm font-semibold">Beispieldaten für 6 Monate laden</button>
+                    <button type="button" onclick="clearAllData()" class="w-full py-2.5 rounded-xl border border-red-200 text-red-600 text-sm font-semibold">Alle Daten löschen</button>
                 </div>
                 <div class="flex gap-3 pt-4">
                     <button type="button" onclick="closeSettingsModal()" class="w-1/2 py-3 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold">Schließen</button>
@@ -428,10 +445,10 @@
         </div>
     </div>
 
-    <!-- Script Logik -->
+    <!-- JavaScript Logik -->
     <script>
-        const STORAGE_KEY_LOGS = 'aura_period_logs_de_v2';
-        const STORAGE_KEY_SETTINGS = 'aura_settings_de_v2';
+        const STORAGE_KEY_LOGS = 'aura_period_logs_de';
+        const STORAGE_KEY_SETTINGS = 'aura_settings_de';
 
         let periodLogs = [];
         let appSettings = { defaultCycleLength: 28, defaultBleedDuration: 5 };
@@ -511,6 +528,7 @@
         }
 
         function clearAllData() {
+            if (!confirm("Wirklich alle Einträge löschen?")) return;
             periodLogs = [];
             saveStateToStorage();
             refreshAllViews();
@@ -552,15 +570,15 @@
             document.getElementById('avg-period-dash').textContent = avgBleed;
 
             if (variation <= 2) {
-                document.getElementById('regularity-status').textContent = "Sehr Regelmäßig";
-                document.getElementById('regularity-desc').textContent = `Minimale Abweichung (±${variation} Tage).`;
+                document.getElementById('regularity-status').textContent = "Sehr regelmäßiger Zyklus";
+                document.getElementById('regularity-desc').textContent = `Geringe Abweichung (±${variation} Tage).`;
             } else {
-                document.getElementById('regularity-status').textContent = "Schwankend";
+                document.getElementById('regularity-status').textContent = "Unregelmäßiges Muster";
                 document.getElementById('regularity-desc').textContent = `Abweichung von ±${variation} Tagen.`;
             }
 
             const latestLog = periodLogs.length > 0 ? periodLogs[periodLogs.length - 1] : null;
-            const today = new Date(); today.setHours(0,0,0,0);
+            const today = new Date(); today.setHours(0, 0, 0, 0);
             if (!latestLog) return;
 
             const lastStart = parseDate(latestLog.startDate);
@@ -575,21 +593,21 @@
             let phaseName = "", phaseDesc = "", phaseTip = "";
 
             if (currentDayOfCycle <= avgBleed) {
-                phaseName = "Menstruation";
-                phaseDesc = "Körperliche Ruhe und Regeneration.";
-                phaseTip = "Eisenreiche Kost (Spinat, Linsen) mit Vitamin C kombinieren.";
+                phaseName = "Menstruationsphase";
+                phaseDesc = "Gebärmutterschleimhaut wird abgebaut. Zeit für Ruhe & Erholung.";
+                phaseTip = "Setze auf eisenreiche Nahrungsmittel in Kombination mit Vitamin C.";
             } else if (currentDayOfCycle < ovulationDay - 4) {
                 phaseName = "Follikelphase";
-                phaseDesc = "Steigendes Östrogen bringt Energie und Fokus.";
-                phaseTip = "Probiotika und leichtes Eiweiß unterstützen das Follikelwachstum.";
+                phaseDesc = "Östrogenspiegel steigt. Energie und Wohlbefinden nehmen zu.";
+                phaseTip = "Fermentierte Lebensmittel & leichtes Eiweiß unterstützen das Wachstum.";
             } else if (currentDayOfCycle <= ovulationDay + 1) {
                 phaseName = "Eisprung (Ovulation)";
-                phaseDesc = "Höchste Fruchtbarkeit und maximale Energie.";
-                phaseTip = "Antioxidantien (Beeren) und Zink (Kürbiskerne) sind jetzt ideal.";
+                phaseDesc = "Höchste Fruchtbarkeit! Hohes Energielevel.";
+                phaseTip = "Antioxidantienreiche Beeren & Kürbiskerne (Zink) sind ideal.";
             } else {
                 phaseName = "Lutealphase";
-                phaseDesc = "Progesteron dominiert. Vorbereitung auf den nächsten Zyklus.";
-                phaseTip = "Magnesium und komplexe Kohlenhydrate reduzieren Heißhunger.";
+                phaseDesc = "Progesteron dominiert. Vorbereitung auf die Periode.";
+                phaseTip = "Komplexe Kohlenhydrate & Magnesium lindern Heißhunger.";
             }
 
             document.getElementById('current-phase-name').textContent = phaseName;
@@ -598,7 +616,7 @@
 
             const nextPeriod = new Date(lastStart); nextPeriod.setDate(nextPeriod.getDate() + avgCycle);
             const daysUntilPeriod = Math.ceil((nextPeriod - today) / (1000 * 60 * 60 * 24));
-            document.getElementById('next-period-countdown').textContent = daysUntilPeriod >= 0 ? `In ${daysUntilPeriod} Tagen` : `Verspätung`;
+            document.getElementById('next-period-countdown').textContent = daysUntilPeriod >= 0 ? `In ${daysUntilPeriod} Tagen` : `Überfällig`;
             document.getElementById('next-period-date').textContent = nextPeriod.toLocaleDateString('de-DE', { month: 'short', day: 'numeric' });
 
             const nextOvu = new Date(lastStart); nextOvu.setDate(nextOvu.getDate() + ovulationDay - 1);
@@ -620,14 +638,26 @@
                 const duration = Math.round((eDate - sDate) / (1000 * 60 * 60 * 24)) + 1;
 
                 const tr = document.createElement('tr');
+                tr.className = "hover:bg-rose-50/50 transition-colors";
                 tr.innerHTML = `
                     <td class="p-3.5 font-semibold text-plum">${sDate.toLocaleDateString('de-DE', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                     <td class="p-3.5">${eDate.toLocaleDateString('de-DE', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                     <td class="p-3.5">${duration} Tage</td>
                     <td class="p-3.5 font-medium text-rose-600">--</td>
-                    <td class="p-3.5 text-right"><button onclick="deleteLog('${log.id}')" class="text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></td>
+                    <td class="p-3.5 text-right"><button onclick="deleteLog('${log.id}')" class="w-11 h-11 inline-flex items-center justify-center rounded-xl text-slate-400 hover:text-red-500"><i data-lucide="trash-2" class="w-5 h-5"></i></button></td>
                 `;
                 tbody.appendChild(tr);
+
+                const li = document.createElement('li');
+                li.className = "flex items-center justify-between gap-3 py-3";
+                li.innerHTML = `
+                    <div class="min-w-0">
+                        <div class="font-semibold text-plum">${sDate.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' })} – ${eDate.toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                        <div class="text-sm text-slate-500 mt-0.5">${duration} Tage Blutung</div>
+                    </div>
+                    <button onclick="deleteLog('${log.id}')" class="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-xl text-slate-400"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                `;
+                list.appendChild(li);
             });
             lucide.createIcons();
         }
@@ -652,8 +682,8 @@
                 let isPeriod = periodLogs.some(l => dateStr >= l.startDate && dateStr <= l.endDate);
 
                 const cell = document.createElement('div');
-                cell.className = `h-12 sm:h-20 p-1 rounded-xl border flex flex-col items-center justify-between ${isPeriod ? 'bg-rose-500 text-white' : 'bg-white text-slate-700'}`;
-                cell.innerHTML = `<span class="text-xs font-bold">${day}</span>`;
+                cell.className = `h-20 sm:h-24 p-1.5 sm:p-2 rounded-2xl border flex flex-col justify-between ${isPeriod ? 'bg-rose-500 text-white' : 'bg-white text-slate-700'}`;
+                cell.innerHTML = `<span class="text-xs sm:text-sm font-semibold">${day}</span>`;
                 grid.appendChild(cell);
             }
         }
@@ -687,14 +717,14 @@
         }
 
         const NUTRITION_DATA_DE = {
-            menstruation: { title: "Menstruationsphase", desc: "Eisen, Magnesium & Entzündungshemmung", items: ["Spinat, Linsen & Rindfleisch für Eisen", "Beeren & Zitrusfrüchte (Vitamin C)", "Ingwertee gegen Krämpfe"] },
-            follicular: { title: "Follikelphase", desc: "Leichtes Eiweiß & Östrogen-Stoffwechsel", items: ["Brokkoli & Blumenkohl", "Eier, Hähnchenbrust & Haferflocken", "Probiotika & Kimchi"] },
-            ovulation: { title: "Eisprung (Ovulation)", desc: "Antioxidantien & gesunde Fette", items: ["Kürbiskerne & Sesam (Zink)", "Avocado & Olivenöl", "Lachs & frische Beeren"] },
-            luteal: { title: "Lutealphase", desc: "Magnesium, Vitamin B6 & Stabilität", items: ["Süßkartoffeln & Kürbis", "Nüsse, Mandeln & Bananen", "Dunkle Schokolade (>70%)"] }
+            menstruation: { title: "Menstruationsphase (Tage 1–5)", subtitle: "Eisen, Magnesium & Entzündungshemmung", nutrients: [{ name: "Eisen & Vitamin C", purpose: "Gleicht Blutverlust aus." }], foods: [{ category: "Eisenlieferanten", items: "Spinat, Linsen, Kichererbsen, Bio-Rindfleisch." }], avoid: "Zucker und übermäßigen Kaffee." },
+            follicular: { title: "Follikelphase (Tage 6–12)", subtitle: "Östrogen-Stoffwechsel & Energie", nutrients: [{ name: "Probiotika", purpose: "Darmgesundheit unterstützen." }], foods: [{ category: "Gemüse", items: "Brokkoli, Blumenkohl, Kimchi." }], avoid: "Sehr schwere Mahlzeiten." },
+            ovulation: { title: "Eisprungphase (Tage 13–16)", subtitle: "Antioxidantien & Gesunde Fette", nutrients: [{ name: "Antioxidantien", purpose: "Eizellqualität schützen." }], foods: [{ category: "Gesunde Fette", items: "Avocado, Olivenöl, Kürbiskerne." }], avoid: "Raffinierte Kohlenhydrate." },
+            luteal: { title: "Lutealphase (Tage 17–28)", subtitle: "Progesteron & PMS-Linderung", nutrients: [{ name: "Magnesium & B6", purpose: "Stimmung stabilisieren." }], foods: [{ category: "Komplexe Kohlenhydrate", items: "Süßkartoffeln, Haferflocken, Bananen." }], avoid: "Alkohol und viel Salz." }
         };
 
-        function filterNutritionPhase(phase) {
-            renderNutritionGuide(phase);
+        function filterNutritionPhase(phaseKey) {
+            renderNutritionGuide(phaseKey);
         }
 
         function renderNutritionGuide(phaseKey) {
@@ -703,10 +733,7 @@
             container.innerHTML = `
                 <div class="bg-rose-50 p-6 rounded-2xl border border-rose-100">
                     <h3 class="text-xl font-bold text-plum">${data.title}</h3>
-                    <p class="text-xs text-slate-600 mt-1">${data.desc}</p>
-                    <ul class="mt-4 space-y-2 text-sm text-slate-700">
-                        ${data.items.map(item => `<li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-rose-500"></i> ${item}</li>`).join('')}
-                    </ul>
+                    <p class="text-xs text-slate-600 mt-1">${data.subtitle}</p>
                 </div>
             `;
             lucide.createIcons();
