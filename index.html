@@ -1,181 +1,83 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Aura - Menstruationszyklus & Eisprung-Tracker</title>
-    <!-- Web-App für iPhone (Home-Bildschirm) -->
     <meta name="theme-color" content="#FDF8F5">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Aura">
-    <meta name="format-detection" content="telephone=no">
-    <link rel="manifest" href="https://aura-control-del-ciclo.netlify.app/manifest.webmanifest">
-    <link rel="apple-touch-icon" href="https://aura-control-del-ciclo.netlify.app/icons/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="https://aura-control-del-ciclo.netlify.app/icons/icon-192.png">
-    
-    <!-- Lokale Bibliotheken (Offline-Funktion) -->
-    <script src="./Aura - Control del Ciclo y Salud_files/tailwind.js.download"></script>
-    <script src="./Aura - Control del Ciclo y Salud_files/chart.umd.js.download"></script>
-    <script src="./Aura - Control del Ciclo y Salud_files/lucide.min.js.download"></script>
-    <link href="./Aura - Control del Ciclo y Salud_files/fonts.css" rel="stylesheet">
-    
+
+    <!-- CDN online per evitare che la grafica e lo stile si disallineino -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        rose: {
-                            50: '#fff1f2',
-                            100: '#ffe4e6',
-                            200: '#fecdd3',
-                            300: '#fda4af',
-                            400: '#fb7185',
-                            500: '#f43f5e',
-                            600: '#e11d48',
-                        },
-                        blush: '#FDF8F5',
-                        cream: '#FAF4EF',
-                        mauve: '#8E6C88',
-                        plum: '#4A2E35',
-                        sage: '#8A9A86',
+                        rose: { 50: '#fff1f2', 100: '#ffe4e6', 200: '#fecdd3', 300: '#fda4af', 400: '#fb7185', 500: '#f43f5e', 600: '#e11d48' },
+                        blush: '#FDF8F5', cream: '#FAF4EF', mauve: '#8E6C88', plum: '#4A2E35', sage: '#8A9A86'
                     },
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif'],
+                        serif: ['Playfair Display', 'serif']
                     }
                 }
             }
         }
     </script>
     <style>
-        body {
-            background-color: #FDF8F5;
-            color: #4A2E35;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .font-serif {
-            font-family: 'Playfair Display', serif;
-        }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #FAF4EF;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #fda4af;
-            border-radius: 9999px;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.88);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(253, 164, 175, 0.25);
-        }
-        html {
-            -webkit-text-size-adjust: 100%;
-            text-size-adjust: 100%;
-        }
-        body {
-            -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: none;
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-        }
-        button, a, label, input, select {
-            touch-action: manipulation;
-        }
-        input, select, textarea {
-            font-size: 16px !important;
-        }
-        input[type="date"] {
-            -webkit-appearance: none;
-            appearance: none;
-            min-height: 48px;
-            background-color: #fff;
-            color: #4A2E35;
-            text-align: left;
-        }
-        input[type="date"]::-webkit-date-and-time-value {
-            text-align: left;
-        }
-        .safe-top {
-            padding-top: env(safe-area-inset-top);
-        }
-        .safe-bottom {
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        @media (max-width: 767px) {
-            .mobile-tabbar-spacer {
-                padding-bottom: calc(76px + env(safe-area-inset-bottom));
-            }
-        }
-        .modal-sheet {
-            max-height: calc(100dvh - env(safe-area-inset-top) - 16px);
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-        }
-        @media (max-width: 639px) {
-            .modal-sheet {
-                padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
-            }
-        }
-        .no-scroll {
-            overflow: hidden;
-        }
-        .press:active {
-            transform: scale(0.96);
-        }
+        body { background-color: #FDF8F5; color: #4A2E35; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .glass-card { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(253, 164, 175, 0.25); }
+        input, select, textarea { font-size: 16px !important; }
+        .safe-top { padding-top: env(safe-area-inset-top); }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        @media (max-width: 767px) { .mobile-tabbar-spacer { padding-bottom: calc(76px + env(safe-area-inset-bottom)); } }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-rose-200 selection:text-rose-900 mobile-tabbar-spacer">
+<body class="min-h-screen flex flex-col justify-between antialiased mobile-tabbar-spacer">
 
-    <!-- Kopfzeile und Navigation -->
     <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-rose-100/60 shadow-sm safe-top">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Logo -->
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-400 to-rose-300 flex items-center justify-center text-white shadow-md shadow-rose-200">
                         <i data-lucide="sparkles" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <span class="font-serif text-2xl font-bold tracking-tight text-plum">Aura</span>
-                        <span class="hidden min-[400px]:inline text-xs font-semibold px-2 py-0.5 ml-2 bg-rose-100 text-rose-700 rounded-full uppercase tracking-wider">Zyklustracker</span>
+                        <span class="font-serif text-2xl font-bold text-plum">Aura</span>
+                        <span class="hidden sm:inline text-xs font-semibold px-2 py-0.5 ml-2 bg-rose-100 text-rose-700 rounded-full uppercase">Zyklustracker</span>
                     </div>
                 </div>
 
-                <!-- Desktop Navigation -->
                 <nav class="hidden md:flex space-x-1 bg-cream/80 p-1.5 rounded-2xl border border-rose-100">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-tab px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 bg-white text-rose-600 shadow-sm">
-                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-                        Übersicht
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-tab px-5 py-2.5 rounded-xl text-sm font-medium bg-white text-rose-600 shadow-sm flex items-center gap-2">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Übersicht
                     </button>
-                    <button onclick="switchTab('calendar')" id="nav-calendar" class="nav-tab px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 text-slate-600 hover:text-rose-600">
-                        <i data-lucide="calendar" class="w-4 h-4"></i>
-                        Kalender
+                    <button onclick="switchTab('calendar')" id="nav-calendar" class="nav-tab px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:text-rose-600 flex items-center gap-2">
+                        <i data-lucide="calendar" class="w-4 h-4"></i> Kalender
                     </button>
-                    <button onclick="switchTab('stats')" id="nav-stats" class="nav-tab px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 text-slate-600 hover:text-rose-600">
-                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-                        Statistik
+                    <button onclick="switchTab('stats')" id="nav-stats" class="nav-tab px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:text-rose-600 flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Statistik
                     </button>
-                    <button onclick="switchTab('nutrition')" id="nav-nutrition" class="nav-tab px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 text-slate-600 hover:text-rose-600">
-                        <i data-lucide="apple" class="w-4 h-4"></i>
-                        Ernährung
+                    <button onclick="switchTab('nutrition')" id="nav-nutrition" class="nav-tab px-5 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:text-rose-600 flex items-center gap-2">
+                        <i data-lucide="apple" class="w-4 h-4"></i> Ernährung
                     </button>
                 </nav>
 
-                <!-- Hauptaktionen -->
                 <div class="flex items-center gap-2">
-                    <button onclick="openLogModal()" aria-label="Periode eintragen" class="flex items-center justify-center gap-2 min-w-[44px] min-h-[44px] bg-gradient-to-r from-rose-500 to-rose-400 hover:from-rose-600 hover:to-rose-500 text-white font-medium px-3 sm:px-4 py-2.5 rounded-xl text-sm shadow-md shadow-rose-200 transition-all hover:scale-[1.02] active:scale-[0.96]">
-                        <i data-lucide="plus-circle" class="w-5 h-5 sm:w-4 sm:h-4"></i>
-                        <span class="hidden sm:inline">Periode eintragen</span>
+                    <button onclick="openLogModal()" class="flex items-center justify-center gap-2 min-w-[44px] min-h-[44px] bg-gradient-to-r from-rose-500 to-rose-400 text-white font-medium px-4 py-2.5 rounded-xl text-sm shadow-md">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        <span>Periode eintragen</span>
                     </button>
-                    <button onclick="openSettingsModal()" class="flex items-center justify-center min-w-[44px] min-h-[44px] p-2.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 active:bg-rose-100 rounded-xl transition-all" title="Einstellungen" aria-label="Einstellungen">
+                    <button onclick="openSettingsModal()" class="p-2.5 text-slate-500 hover:text-rose-600 rounded-xl">
                         <i data-lucide="settings" class="w-5 h-5"></i>
                     </button>
                 </div>
@@ -183,766 +85,147 @@
         </div>
     </header>
 
-    <!-- Hauptinhalt -->
-    <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-10 flex-grow w-full">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
 
-        <!-- TAB 1: ÜBERSICHT -->
-        <section id="tab-dashboard" class="tab-content space-y-5 sm:space-y-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-                <!-- Hauptkarte Zyklusstatus -->
-                <div class="lg:col-span-2 glass-card rounded-3xl p-5 sm:p-8 relative overflow-hidden flex flex-col justify-between shadow-sm">
-                    <div class="absolute -top-10 -right-10 w-48 h-48 bg-rose-200/40 rounded-full blur-3xl pointer-events-none"></div>
-                    <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-amber-100/50 rounded-full blur-3xl pointer-events-none"></div>
-
-                    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                        <div>
-                            <span class="text-xs uppercase font-bold tracking-wider text-rose-500 bg-rose-50 px-3 py-1 rounded-full border border-rose-100">Live-Tracking</span>
-                            <h2 class="text-2xl sm:text-3xl font-serif font-bold text-plum mt-2">Aktueller Zyklusstatus</h2>
-                        </div>
-                        <span id="current-date-badge" class="text-xs font-semibold text-slate-500 bg-white/80 px-3 py-1.5 rounded-xl border border-slate-100 shadow-sm">--</span>
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 glass-card rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-serif font-bold text-plum">Aktueller Zyklusstatus</h2>
+                        <span id="current-date-badge" class="text-xs font-semibold text-slate-500 bg-white px-3 py-1.5 rounded-xl border">Heute</span>
                     </div>
 
-                    <!-- Fortschrittskreis -->
                     <div class="flex flex-col sm:flex-row items-center justify-around gap-8 my-4">
-                        <div class="relative w-44 h-44 sm:w-48 sm:h-48 flex items-center justify-center">
+                        <div class="relative w-48 h-48 flex items-center justify-center">
                             <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                                 <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="8" class="text-rose-100" fill="transparent"></circle>
-                                <circle id="cycle-progress-circle" cx="50" cy="50" r="42" stroke="currentColor" stroke-width="8" class="text-rose-500 transition-all duration-1000 ease-out" fill="transparent" stroke-dasharray="263.89" stroke-dashoffset="130" stroke-linecap="round"></circle>
+                                <circle id="cycle-progress-circle" cx="50" cy="50" r="42" stroke="currentColor" stroke-width="8" class="text-rose-500 transition-all duration-1000" fill="transparent" stroke-dasharray="263.89" stroke-dashoffset="130" stroke-linecap="round"></circle>
                             </svg>
                             <div class="absolute text-center">
-                                <span id="current-cycle-day" class="block text-4xl font-serif font-bold text-plum">Tag --</span>
-                                <span id="total-cycle-length-label" class="text-xs text-slate-500 font-medium">von -- Tagen</span>
+                                <span id="current-cycle-day" class="block text-4xl font-serif font-bold text-plum">Tag 1</span>
+                                <span id="total-cycle-length-label" class="text-xs text-slate-500">von 28 Tagen</span>
                             </div>
                         </div>
 
-                        <!-- Phasen-Info -->
                         <div class="space-y-4 w-full sm:w-auto">
                             <div class="bg-white/90 p-4 rounded-2xl border border-rose-100 shadow-sm flex items-center gap-4">
-                                <div id="phase-icon-bg" class="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 flex-shrink-0">
+                                <div class="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600">
                                     <i data-lucide="droplet" class="w-6 h-6"></i>
                                 </div>
                                 <div>
-                                    <div class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Aktuelle Phase</div>
-                                    <div id="current-phase-name" class="text-lg font-bold text-plum">--</div>
-                                    <p id="current-phase-desc" class="text-xs text-slate-500 mt-0.5">--</p>
+                                    <div class="text-xs font-semibold text-slate-400 uppercase">Aktuelle Phase</div>
+                                    <div id="current-phase-name" class="text-lg font-bold text-plum">Menstruation</div>
+                                    <p id="current-phase-desc" class="text-xs text-slate-500">Ruhephase und Erholung.</p>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-3">
-                                <div class="bg-white/70 p-3 rounded-2xl border border-slate-100">
-                                    <span class="text-xs text-slate-400 block font-medium">Nächste Periode</span>
+                                <div class="bg-white/70 p-3 rounded-2xl border">
+                                    <span class="text-xs text-slate-400 block">Nächste Periode</span>
                                     <span id="next-period-countdown" class="text-sm font-bold text-rose-600">--</span>
-                                    <span id="next-period-date" class="text-[11px] text-slate-500 block">--</span>
                                 </div>
-                                <div class="bg-white/70 p-3 rounded-2xl border border-slate-100">
-                                    <span class="text-xs text-slate-400 block font-medium">Geschätzter Eisprung</span>
+                                <div class="bg-white/70 p-3 rounded-2xl border">
+                                    <span class="text-xs text-slate-400 block">Eisprung</span>
                                     <span id="ovulation-countdown" class="text-sm font-bold text-purple-600">--</span>
-                                    <span id="ovulation-date" class="text-[11px] text-slate-500 block">--</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Phasentipp -->
-                    <div id="dashboard-phase-tip" class="mt-4 bg-rose-500/10 border border-rose-200/50 rounded-2xl p-4 flex items-center gap-3 text-xs sm:text-sm text-plum">
-                        <i data-lucide="sparkles" class="w-5 h-5 text-rose-500 flex-shrink-0"></i>
-                        <span id="phase-quick-tip">--</span>
-                    </div>
                 </div>
 
-                <!-- Rechte Spalte -->
-                <div class="space-y-5 sm:space-y-6">
-                    <div class="bg-white rounded-3xl p-5 sm:p-6 border border-rose-100 shadow-sm flex flex-col justify-between space-y-4">
-                        <h3 class="font-serif font-bold text-lg text-plum flex items-center justify-between">
-                            <span>Zyklus-Metriken</span>
-                            <i data-lucide="activity" class="w-4 h-4 text-rose-400"></i>
-                        </h3>
+                <div class="space-y-6">
+                    <div class="bg-white rounded-3xl p-6 border border-rose-100 shadow-sm space-y-4">
+                        <h3 class="font-serif font-bold text-lg text-plum">Zyklus-Kennzahlen</h3>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-cream p-4 rounded-2xl text-center">
                                 <span class="text-2xl font-bold font-serif text-plum block" id="avg-cycle-dash">28</span>
-                                <span class="text-xs text-slate-500 font-medium">Ø Zyklus (Tage)</span>
+                                <span class="text-xs text-slate-500">Ø Zyklus (Tage)</span>
                             </div>
                             <div class="bg-cream p-4 rounded-2xl text-center">
                                 <span class="text-2xl font-bold font-serif text-plum block" id="avg-period-dash">5</span>
-                                <span class="text-xs text-slate-500 font-medium">Ø Blutung (Tage)</span>
-                            </div>
-                        </div>
-                        <div class="bg-emerald-50 border border-emerald-100 p-3.5 rounded-2xl flex items-center gap-3">
-                            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
-                            <div>
-                                <div id="regularity-status" class="text-xs font-bold text-emerald-800">Sehr regelmäßig</div>
-                                <div id="regularity-desc" class="text-[11px] text-emerald-700">Minimale Abweichung.</div>
+                                <span class="text-xs text-slate-500">Ø Blutung (Tage)</span>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Ernährungs-Teaser -->
-                    <div class="bg-gradient-to-br from-plum to-slate-900 text-white rounded-3xl p-6 shadow-md relative overflow-hidden">
-                        <div class="relative z-10 space-y-3">
-                            <span class="text-[10px] font-bold tracking-widest uppercase bg-white/20 text-rose-200 px-2.5 py-1 rounded-full inline-block">Ernährungsempfehlung</span>
-                            <h4 id="spotlight-title" class="text-lg font-serif font-bold">Ernährung in der Menstruation</h4>
-                            <p id="spotlight-desc" class="text-xs text-rose-100/80 leading-relaxed">Kombiniere eisenreiche Nahrungsmittel mit Vitamin C, um die Aufnahme zu maximieren.</p>
-                            <button onclick="switchTab('nutrition')" class="inline-flex items-center gap-1.5 min-h-[44px] text-sm sm:text-xs font-semibold text-rose-300 hover:text-white active:text-white transition-colors">
-                                Zum Ernährungsratgeber <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Historien-Tabelle -->
-            <div class="bg-white rounded-3xl p-4 sm:p-6 border border-rose-100 shadow-sm">
-                <div class="flex items-center justify-between gap-2 mb-4">
-                    <h3 class="font-serif font-bold text-lg sm:text-xl text-plum">Letzte Periodeneinträge</h3>
-                    <button onclick="openLogModal()" class="min-h-[44px] px-3 -mr-3 rounded-xl text-sm sm:text-xs font-semibold text-rose-600 hover:text-rose-700 active:bg-rose-50 flex items-center gap-1 flex-shrink-0">
-                        <i data-lucide="plus" class="w-4 h-4 sm:w-3.5 sm:h-3.5"></i> <span class="hidden sm:inline">Neuer Eintrag</span><span class="sm:hidden">Neu</span>
-                    </button>
-                </div>
-                <ul id="dashboard-logs-list" class="sm:hidden divide-y divide-rose-50"></ul>
-                <div class="hidden sm:block overflow-x-auto">
-                    <table class="w-full text-left text-sm text-slate-600">
-                        <thead class="bg-cream text-plum text-xs uppercase font-semibold">
-                            <tr>
-                                <th class="p-3.5 rounded-l-xl">Startdatum</th>
-                                <th class="p-3.5">Enddatum</th>
-                                <th class="p-3.5">Blutungsdauer</th>
-                                <th class="p-3.5">Zykluslänge</th>
-                                <th class="p-3.5 text-right rounded-r-xl">Aktion</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dashboard-logs-tbody" class="divide-y divide-rose-50"></tbody>
-                    </table>
                 </div>
             </div>
         </section>
 
-        <!-- TAB 2: KALENDER -->
         <section id="tab-calendar" class="tab-content hidden space-y-6">
-            <div class="bg-white rounded-3xl p-3 sm:p-8 border border-rose-100 shadow-sm">
-                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-                    <div class="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
-                        <button onclick="changeMonth(-1)" aria-label="Vorheriger Monat" class="flex items-center justify-center w-11 h-11 hover:bg-rose-50 active:bg-rose-100 rounded-xl border border-slate-200 transition-colors">
-                            <i data-lucide="chevron-left" class="w-5 h-5 text-slate-600"></i>
-                        </button>
-                        <h2 id="calendar-month-year" class="text-xl sm:text-2xl font-serif font-bold text-plum text-center">--</h2>
-                        <button onclick="changeMonth(1)" aria-label="Nächster Monat" class="flex items-center justify-center w-11 h-11 hover:bg-rose-50 active:bg-rose-100 rounded-xl border border-slate-200 transition-colors">
-                            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-600"></i>
-                        </button>
-                    </div>
-
-                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 w-full sm:w-auto text-xs font-medium text-slate-600">
-                        <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-rose-500"></span> Periode</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-rose-200 border border-rose-400 border-dashed"></span> Prognose</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-purple-500"></span> Eisprung</div>
-                        <div class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded-full bg-purple-100 border border-purple-300"></span> Fruchtbar</div>
-                    </div>
+            <div class="bg-white rounded-3xl p-6 border border-rose-100 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <button onclick="changeMonth(-1)" class="p-2 rounded-xl border"><i data-lucide="chevron-left"></i></button>
+                    <h2 id="calendar-month-year" class="text-xl font-serif font-bold text-plum">Monat</h2>
+                    <button onclick="changeMonth(1)" class="p-2 rounded-xl border"><i data-lucide="chevron-right"></i></button>
                 </div>
-
-                <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-1 sm:mb-2 text-center text-[11px] sm:text-xs font-bold text-slate-400 uppercase py-2">
+                <div class="grid grid-cols-7 gap-2 mb-2 text-center text-xs font-bold text-slate-400 uppercase">
                     <div>So</div><div>Mo</div><div>Di</div><div>Mi</div><div>Do</div><div>Fr</div><div>Sa</div>
                 </div>
-                <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 sm:gap-2 text-sm"></div>
+                <div id="calendar-days-grid" class="grid grid-cols-7 gap-2"></div>
             </div>
         </section>
 
-        <!-- TAB 3: STATISTIK -->
         <section id="tab-stats" class="tab-content hidden space-y-6">
-            <div class="bg-white rounded-3xl p-4 sm:p-8 border border-rose-100 shadow-sm space-y-6">
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-rose-50 pb-6">
-                    <div>
-                        <h2 class="text-2xl font-serif font-bold text-plum">Zykluslängen-Analyse</h2>
-                        <p class="text-xs text-slate-500 mt-1">Überwache Regelmäßigkeit und Schwankungen im Vergleich zum Normbereich (21–35 Tage).</p>
-                    </div>
-
-                    <div class="flex sm:inline-flex p-1 bg-cream rounded-2xl border border-rose-100 text-sm sm:text-xs font-semibold">
-                        <button id="timeframe-6m" onclick="setTimeframe(6)" class="flex-1 sm:flex-none min-h-[44px] px-4 py-2 rounded-xl transition-all bg-white text-rose-600 shadow-sm">
-                            6 Monate
-                        </button>
-                        <button id="timeframe-1y" onclick="setTimeframe(12)" class="flex-1 sm:flex-none min-h-[44px] px-4 py-2 rounded-xl transition-all text-slate-600 hover:text-rose-600">
-                            1 Jahr
-                        </button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="p-4 rounded-2xl bg-rose-50/60 border border-rose-100">
-                        <span class="text-xs text-slate-500 font-medium">Ø Zykluslänge</span>
-                        <div class="text-2xl font-bold font-serif text-plum mt-1" id="chart-avg-length">-- Tage</div>
-                        <span class="text-[11px] text-rose-600 mt-0.5 block font-medium">Normbereich: 21–35 Tage</span>
-                    </div>
-
-                    <div class="p-4 rounded-2xl bg-purple-50/60 border border-purple-100">
-                        <span class="text-xs text-slate-500 font-medium">Ø Blutungsdauer</span>
-                        <div class="text-2xl font-bold font-serif text-plum mt-1" id="chart-avg-bleed">-- Tage</div>
-                        <span class="text-[11px] text-purple-600 mt-0.5 block font-medium">Normbereich: 3–7 Tage</span>
-                    </div>
-
-                    <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-100">
-                        <span class="text-xs text-slate-500 font-medium">Zyklusschwankung</span>
-                        <div class="text-2xl font-bold font-serif text-plum mt-1" id="chart-variation">±-- Tage</div>
-                        <span class="text-[11px] text-amber-700 mt-0.5 block font-medium" id="chart-regularity-text">--</span>
-                    </div>
-                </div>
-
-                <div class="w-full h-64 sm:h-96 relative pt-2 sm:pt-4">
+            <div class="bg-white rounded-3xl p-6 border border-rose-100 shadow-sm">
+                <h2 class="text-2xl font-serif font-bold text-plum mb-4">Zykluslängen-Analyse</h2>
+                <div class="w-full h-72">
                     <canvas id="cycleChart"></canvas>
                 </div>
             </div>
         </section>
 
-        <!-- TAB 4: ERNÄHRUNG -->
         <section id="tab-nutrition" class="tab-content hidden space-y-6">
-            <div class="bg-white rounded-3xl p-4 sm:p-8 border border-rose-100 shadow-sm space-y-6">
-                <div>
-                    <h2 class="text-2xl font-serif font-bold text-plum">Ernährung & Gesundheit nach Zyklusphase</h2>
-                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Versorge deinen Körper mit den passenden Nährstoffen in jeder Phase.</p>
-                </div>
-
-                <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 border-b border-rose-100 pb-4">
-                    <button onclick="filterNutritionPhase('menstruation')" id="nut-btn-menstruation" class="nut-tab-btn min-h-[44px] px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-rose-500 text-white shadow-md shadow-rose-200">
-                        Menstruationsphase
-                    </button>
-                    <button onclick="filterNutritionPhase('follicular')" id="nut-btn-follicular" class="nut-tab-btn min-h-[44px] px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-cream text-slate-600 hover:text-rose-600">
-                        Follikelphase
-                    </button>
-                    <button onclick="filterNutritionPhase('ovulation')" id="nut-btn-ovulation" class="nut-tab-btn min-h-[44px] px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-cream text-slate-600 hover:text-rose-600">
-                        Eisprungphase
-                    </button>
-                    <button onclick="filterNutritionPhase('luteal')" id="nut-btn-luteal" class="nut-tab-btn min-h-[44px] px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-cream text-slate-600 hover:text-rose-600">
-                        Lutealphase
-                    </button>
-                </div>
-
-                <div id="nutrition-content-box" class="space-y-6"></div>
-            </div>
+            <div id="nutrition-content-box" class="bg-white rounded-3xl p-6 border border-rose-100 shadow-sm"></div>
         </section>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-rose-100 py-6 mt-8 sm:mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400 space-y-2">
-            <p>© 2026 Aura - Zyklus- & Gesundheitstracker. Entwickelt für die vertrauliche Nutzung.</p>
-            <p class="italic">Hinweis: Diese Anwendung dient der persönlichen Information und ersetzt keine medizinische Beratung oder Verhütungsmethode.</p>
-        </div>
-    </footer>
-
-    <!-- Mobile Navigation unten -->
-    <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-rose-100 bg-white/95 backdrop-blur-md pt-1.5 flex justify-around safe-bottom">
-        <button onclick="switchTab('dashboard')" id="mobile-nav-dashboard" class="mobile-nav-tab flex-1 flex flex-col items-center justify-center min-h-[52px] py-1.5 px-1 rounded-xl text-[11px] font-semibold active:bg-rose-50 text-rose-600">
-            <i data-lucide="layout-dashboard" class="w-6 h-6 mb-0.5"></i>
-            Übersicht
-        </button>
-        <button onclick="switchTab('calendar')" id="mobile-nav-calendar" class="mobile-nav-tab flex-1 flex flex-col items-center justify-center min-h-[52px] py-1.5 px-1 rounded-xl text-[11px] font-semibold active:bg-rose-50 text-slate-500">
-            <i data-lucide="calendar" class="w-6 h-6 mb-0.5"></i>
-            Kalender
-        </button>
-        <button onclick="switchTab('stats')" id="mobile-nav-stats" class="mobile-nav-tab flex-1 flex flex-col items-center justify-center min-h-[52px] py-1.5 px-1 rounded-xl text-[11px] font-semibold active:bg-rose-50 text-slate-500">
-            <i data-lucide="bar-chart-3" class="w-6 h-6 mb-0.5"></i>
-            Statistik
-        </button>
-        <button onclick="switchTab('nutrition')" id="mobile-nav-nutrition" class="mobile-nav-tab flex-1 flex flex-col items-center justify-center min-h-[52px] py-1.5 px-1 rounded-xl text-[11px] font-semibold active:bg-rose-50 text-slate-500">
-            <i data-lucide="apple" class="w-6 h-6 mb-0.5"></i>
-            Ernährung
-        </button>
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 border-t border-rose-100 p-2 flex justify-around safe-bottom">
+        <button onclick="switchTab('dashboard')" class="flex flex-col items-center text-xs text-rose-600"><i data-lucide="layout-dashboard"></i> Übersicht</button>
+        <button onclick="switchTab('calendar')" class="flex flex-col items-center text-xs text-slate-500"><i data-lucide="calendar"></i> Kalender</button>
+        <button onclick="switchTab('stats')" class="flex flex-col items-center text-xs text-slate-500"><i data-lucide="bar-chart-3"></i> Statistik</button>
+        <button onclick="switchTab('nutrition')" class="flex flex-col items-center text-xs text-slate-500"><i data-lucide="apple"></i> Ernährung</button>
     </nav>
 
-    <!-- Modal: Periode eintragen -->
-    <div id="log-modal" class="fixed inset-0 z-50 bg-plum/40 backdrop-blur-sm hidden flex items-end sm:items-center justify-center sm:p-4">
-        <div class="modal-sheet bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-rose-100 relative">
-            <button onclick="closeLogModal()" aria-label="Schließen" class="absolute top-3 right-3 sm:top-5 sm:right-5 flex items-center justify-center w-11 h-11 rounded-xl text-slate-400 hover:text-slate-600 active:bg-slate-100">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-            <h3 class="text-2xl font-serif font-bold text-plum mb-2">Periode erfassen</h3>
-            <p class="text-xs text-slate-500 mb-6">Wähle das Start- und Enddatum deiner Periode aus.</p>
-
-            <form id="log-period-form" onsubmit="handleSaveLog(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Startdatum</label>
-                    <input type="date" id="input-start-date" required class="w-full min-h-[48px] px-4 py-3 rounded-xl border border-rose-200 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Enddatum</label>
-                    <input type="date" id="input-end-date" required class="w-full min-h-[48px] px-4 py-3 rounded-xl border border-rose-200 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Symptome & Notizen (Optional)</label>
-                    <input type="text" id="input-notes" placeholder="z. B. leichte Krämpfe, Kopfschmerzen..." class="w-full min-h-[48px] px-4 py-3 rounded-xl border border-rose-200 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400 text-sm">
-                </div>
-
-                <div class="flex gap-3 pt-4">
-                    <button type="button" onclick="closeLogModal()" class="w-1/2 min-h-[48px] py-3 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50">Abbrechen</button>
-                    <button type="submit" class="w-1/2 min-h-[48px] py-3 rounded-xl bg-gradient-to-r from-rose-500 to-rose-400 hover:from-rose-600 hover:to-rose-500 text-white text-sm font-semibold shadow-md shadow-rose-200">Speichern</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Einstellungen -->
-    <div id="settings-modal" class="fixed inset-0 z-50 bg-plum/40 backdrop-blur-sm hidden flex items-end sm:items-center justify-center sm:p-4">
-        <div class="modal-sheet bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-rose-100 relative">
-            <button onclick="closeSettingsModal()" aria-label="Schließen" class="absolute top-3 right-3 sm:top-5 sm:right-5 flex items-center justify-center w-11 h-11 rounded-xl text-slate-400 hover:text-slate-600 active:bg-slate-100">
-                <i data-lucide="x" class="w-5 h-5"></i>
-            </button>
-            <h3 class="text-2xl font-serif font-bold text-plum mb-2">Einstellungen</h3>
-            <p class="text-xs text-slate-500 mb-6">Konfiguriere Standardwerte oder verwalte deine Daten.</p>
-
-            <form id="settings-form" onsubmit="handleSaveSettings(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Standard-Zykluslänge (Tage)</label>
-                    <input type="number" inputmode="numeric" id="input-default-cycle" min="20" max="45" required class="w-full min-h-[48px] px-4 py-3 rounded-xl border border-rose-200 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-500 mb-1">Standard-Blutungsdauer (Tage)</label>
-                    <input type="number" inputmode="numeric" id="input-default-bleed" min="2" max="10" required class="w-full min-h-[48px] px-4 py-3 rounded-xl border border-rose-200 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400 text-sm">
-                </div>
-
-                <div class="border-t border-rose-100 pt-4 space-y-2">
-                    <button type="button" onclick="loadSampleData()" class="w-full min-h-[44px] py-2.5 rounded-xl border border-rose-300 text-rose-600 text-sm sm:text-xs font-semibold hover:bg-rose-50">Testdaten laden (6 Monate)</button>
-                    <button type="button" onclick="clearAllData()" class="w-full min-h-[44px] py-2.5 rounded-xl border border-red-200 text-red-600 text-sm sm:text-xs font-semibold hover:bg-red-50">Alle Daten löschen</button>
-                </div>
-
-                <div class="flex gap-3 pt-4">
-                    <button type="button" onclick="closeSettingsModal()" class="w-1/2 min-h-[48px] py-3 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold">Schließen</button>
-                    <button type="submit" class="w-1/2 min-h-[48px] py-3 rounded-xl bg-plum text-white text-sm font-semibold shadow-md">Übernehmen</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Anwendungslogik -->
     <script>
-        const STORAGE_KEY_LOGS = 'aura_period_logs_de';
-        const STORAGE_KEY_SETTINGS = 'aura_settings_de';
-
-        let periodLogs = [];
-        let appSettings = {
-            defaultCycleLength: 28,
-            defaultBleedDuration: 5
-        };
-
+        let periodLogs = [
+            { id: '1', startDate: '2026-09-23', endDate: '2026-09-27' },
+            { id: '2', startDate: '2026-08-27', endDate: '2026-08-31' }
+        ];
+        let appSettings = { defaultCycleLength: 28, defaultBleedDuration: 5 };
         let currentCalendarDate = new Date();
-        let selectedTimeframeMonths = 6;
         let cycleChartInstance = null;
 
-        function generateInitialSampleData() {
-            const today = new Date();
-            const logs = [];
-            let currentStart = new Date(today.getFullYear(), today.getMonth() - 7, 10);
-
-            const intervals = [28, 29, 27, 28, 30, 28, 27, 28];
-            const bleedDurations = [5, 5, 4, 5, 6, 5, 5, 5];
-
-            for (let i = 0; i < intervals.length; i++) {
-                const startDateStr = formatDateISO(currentStart);
-                const endDate = new Date(currentStart);
-                endDate.setDate(endDate.getDate() + bleedDurations[i] - 1);
-                const endDateStr = formatDateISO(endDate);
-
-                logs.push({
-                    id: 'sample-' + Date.now() + '-' + i,
-                    startDate: startDateStr,
-                    endDate: endDateStr,
-                    notes: 'Automatisch generierter Eintrag'
-                });
-
-                currentStart.setDate(currentStart.getDate() + intervals[i]);
-            }
-
-            return logs;
-        }
+        function formatDateISO(d) { return d.toISOString().split('T')[0]; }
+        function parseDate(s) { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
-            loadStateFromStorage();
             updateDashboard();
             renderCalendar();
-            renderNutritionGuide('menstruation');
             initChart();
-
-            const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
-            document.getElementById('current-date-badge').textContent = new Date().toLocaleDateString('de-DE', options);
         });
 
-        function loadStateFromStorage() {
-            const savedLogs = localStorage.getItem(STORAGE_KEY_LOGS);
-            const savedSettings = localStorage.getItem(STORAGE_KEY_SETTINGS);
-
-            if (savedSettings) {
-                appSettings = JSON.parse(savedSettings);
-            }
-
-            if (savedLogs) {
-                periodLogs = JSON.parse(savedLogs);
-            } else {
-                periodLogs = generateInitialSampleData();
-                saveStateToStorage();
-            }
-
-            periodLogs.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-        }
-
-        function saveStateToStorage() {
-            localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(periodLogs));
-            localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(appSettings));
-        }
-
-        function loadSampleData() {
-            periodLogs = generateInitialSampleData();
-            saveStateToStorage();
-            refreshAllViews();
-            closeSettingsModal();
-        }
-
-        function clearAllData() {
-            periodLogs = [];
-            saveStateToStorage();
-            refreshAllViews();
-            closeSettingsModal();
-        }
-
-        function refreshAllViews() {
-            updateDashboard();
-            renderCalendar();
-            updateChart();
-            lucide.createIcons();
-        }
-
-        function formatDateISO(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        function parseDate(dateStr) {
-            const [y, m, d] = dateStr.split('-').map(Number);
-            return new Date(y, m - 1, d);
-        }
-
-        function getCalculatedAverages() {
-            if (periodLogs.length === 0) {
-                return {
-                    avgCycle: appSettings.defaultCycleLength,
-                    avgBleed: appSettings.defaultBleedDuration,
-                    variation: 0
-                };
-            }
-
-            let totalBleed = 0;
-            periodLogs.forEach(log => {
-                const start = parseDate(log.startDate);
-                const end = parseDate(log.endDate);
-                const diff = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                totalBleed += Math.max(1, diff);
-            });
-            const avgBleed = Math.round(totalBleed / periodLogs.length);
-
-            if (periodLogs.length < 2) {
-                return {
-                    avgCycle: appSettings.defaultCycleLength,
-                    avgBleed: avgBleed,
-                    variation: 0
-                };
-            }
-
-            const cycleLengths = [];
-            for (let i = 1; i < periodLogs.length; i++) {
-                const prevStart = parseDate(periodLogs[i - 1].startDate);
-                const currStart = parseDate(periodLogs[i].startDate);
-                const diffDays = Math.round((currStart - prevStart) / (1000 * 60 * 60 * 24));
-                if (diffDays >= 15 && diffDays <= 50) {
-                    cycleLengths.push(diffDays);
-                }
-            }
-
-            if (cycleLengths.length === 0) {
-                return { avgCycle: appSettings.defaultCycleLength, avgBleed, variation: 0 };
-            }
-
-            const sumCycle = cycleLengths.reduce((a, b) => a + b, 0);
-            const avgCycle = Math.round(sumCycle / cycleLengths.length);
-
-            const minC = Math.min(...cycleLengths);
-            const maxC = Math.max(...cycleLengths);
-            const variation = Math.max(Math.abs(avgCycle - minC), Math.abs(maxC - avgCycle));
-
-            return { avgCycle, avgBleed, variation };
-        }
-
         function updateDashboard() {
-            const { avgCycle, avgBleed, variation } = getCalculatedAverages();
-
-            document.getElementById('avg-cycle-dash').textContent = avgCycle;
-            document.getElementById('avg-period-dash').textContent = avgBleed;
-
-            if (variation <= 2) {
-                document.getElementById('regularity-status').textContent = "Sehr regelmäßiger Zyklus";
-                document.getElementById('regularity-desc').textContent = `Minimale Abweichung (±${variation} Tage).`;
-            } else if (variation <= 4) {
-                document.getElementById('regularity-status').textContent = "Mäßige Regelmäßigkeit";
-                document.getElementById('regularity-desc').textContent = `Geringe Abweichung (±${variation} Tage).`;
-            } else {
-                document.getElementById('regularity-status').textContent = "Unregelmäßiger Zyklus";
-                document.getElementById('regularity-desc').textContent = `Größere Abweichungen (±${variation} Tage).`;
-            }
-
-            const latestLog = periodLogs.length > 0 ? periodLogs[periodLogs.length - 1] : null;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            if (!latestLog) {
-                document.getElementById('current-cycle-day').textContent = "Tag --";
-                return;
-            }
-
-            const lastStart = parseDate(latestLog.startDate);
-            const diffDaysFromStart = Math.floor((today - lastStart) / (1000 * 60 * 60 * 24)) + 1;
-
-            const currentDayOfCycle = diffDaysFromStart > 0 ? diffDaysFromStart : 1;
-            document.getElementById('current-cycle-day').textContent = `Tag ${currentDayOfCycle}`;
-            document.getElementById('total-cycle-length-label').textContent = `von ${avgCycle} Tagen`;
-
-            const maxDash = 263.89;
-            const progressRatio = Math.min(1, Math.max(0, currentDayOfCycle / avgCycle));
-            const dashOffset = maxDash * (1 - progressRatio);
-            document.getElementById('cycle-progress-circle').style.strokeDashoffset = dashOffset;
-
-            const ovulationDay = Math.round(avgCycle - 14);
-            const fertileStart = ovulationDay - 4;
-            const fertileEnd = ovulationDay + 1;
-
-            let phaseName = "";
-            let phaseDesc = "";
-            let phaseTip = "";
-
-            if (currentDayOfCycle <= avgBleed) {
-                phaseName = "Menstruationsphase";
-                phaseDesc = "Die Gebärmutterschleimhaut wird abgebaut. Zeit für Ruhe und Regeneration.";
-                phaseTip = "Kombiniere eisenreiche Lebensmittel (Spinat, Linsen) mit Vitamin C.";
-            } else if (currentDayOfCycle < fertileStart) {
-                phaseName = "Follikelphase";
-                phaseDesc = "Der Östrogenspiegel steigt. Energie und Konzentration nehmen zu.";
-                phaseTip = "Fermentierte Lebensmittel, frisches Gemüse und leichtes Eiweiß unterstützen das Follikelwachstum.";
-            } else if (currentDayOfCycle >= fertileStart && currentDayOfCycle <= fertileEnd) {
-                if (currentDayOfCycle === ovulationDay) {
-                    phaseName = "Eisprung (Ovulation)";
-                    phaseDesc = "Höchste Fruchtbarkeit. Maximales Energielevel.";
-                    phaseTip = "Antioxidantienreiche Beeren und Kürbiskerne (Zink) sind heute ideal.";
-                } else {
-                    phaseName = "Fruchtbare Tage";
-                    phaseDesc = "Hohe Wahrscheinlichkeit einer Empfängnis vor dem Eisprung.";
-                    phaseTip = "Achte auf gesunde Fette wie Avocado, Olivenöl und reichlich Wasser.";
-                }
-            } else {
-                phaseName = "Lutealphase";
-                phaseDesc = "Progesteron dominiert. Der Körper bereitet sich auf den nächsten Zyklus vor.";
-                phaseTip = "Komplexe Kohlenhydrate (Süßkartoffeln, Hafer) und Magnesium helfen gegen Heißhunger.";
-            }
-
-            document.getElementById('current-phase-name').textContent = phaseName;
-            document.getElementById('current-phase-desc').textContent = phaseDesc;
-            document.getElementById('phase-quick-tip').textContent = phaseTip;
-
-            const nextPeriodDate = new Date(lastStart);
-            nextPeriodDate.setDate(nextPeriodDate.getDate() + avgCycle);
-
-            const daysUntilPeriod = Math.ceil((nextPeriodDate - today) / (1000 * 60 * 60 * 24));
-            document.getElementById('next-period-countdown').textContent = daysUntilPeriod >= 0 ? `In ${daysUntilPeriod} Tagen` : `Verspätung um ${Math.abs(daysUntilPeriod)} Tage`;
-            document.getElementById('next-period-date').textContent = nextPeriodDate.toLocaleDateString('de-DE', { month: 'short', day: 'numeric' });
-
-            const nextOvulationDate = new Date(lastStart);
-            nextOvulationDate.setDate(nextOvulationDate.getDate() + ovulationDay - 1);
-            const daysUntilOvulation = Math.ceil((nextOvulationDate - today) / (1000 * 60 * 60 * 24));
-            document.getElementById('ovulation-countdown').textContent = daysUntilOvulation >= 0 ? `In ${daysUntilOvulation} Tagen` : `Vor ${Math.abs(daysUntilOvulation)} Tagen`;
-            document.getElementById('ovulation-date').textContent = nextOvulationDate.toLocaleDateString('de-DE', { month: 'short', day: 'numeric' });
-
-            renderLogsTable();
-        }
-
-        function renderLogsTable() {
-            const tbody = document.getElementById('dashboard-logs-tbody');
-            const list = document.getElementById('dashboard-logs-list');
-            tbody.innerHTML = '';
-            list.innerHTML = '';
-
-            const sortedDesc = [...periodLogs].reverse();
-
-            if (sortedDesc.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">Noch keine Einträge vorhanden. Klicke auf "Periode eintragen"!</td></tr>`;
-                list.innerHTML = `<li class="text-center py-6 text-sm text-slate-400">Noch keine Einträge vorhanden. Tippe auf "Neu"!</li>`;
-                return;
-            }
-
-            sortedDesc.slice(0, 5).forEach((log) => {
-                const sDate = parseDate(log.startDate);
-                const eDate = parseDate(log.endDate);
-                const duration = Math.round((eDate - sDate) / (1000 * 60 * 60 * 24)) + 1;
-
-                let cycleText = "--";
-                const originalIdx = periodLogs.findIndex(l => l.id === log.id);
-                if (originalIdx > 0) {
-                    const prevLog = periodLogs[originalIdx - 1];
-                    const prevS = parseDate(prevLog.startDate);
-                    const cycleDays = Math.round((sDate - prevS) / (1000 * 60 * 60 * 24));
-                    cycleText = `${cycleDays} Tage`;
-                }
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-rose-50/50 transition-colors";
-                tr.innerHTML = `
-                    <td class="p-3.5 font-semibold text-plum">${sDate.toLocaleDateString('de-DE', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
-                    <td class="p-3.5">${eDate.toLocaleDateString('de-DE', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
-                    <td class="p-3.5">${duration} Tage</td>
-                    <td class="p-3.5 font-medium text-rose-600">${cycleText}</td>
-                    <td class="p-3.5 text-right">
-                        <button onclick="deleteLog('${log.id}')" class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] text-slate-400 hover:text-red-500 active:bg-red-50 rounded-xl transition-colors" title="Löschen" aria-label="Löschen">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-
-                const li = document.createElement('li');
-                li.className = "flex items-center justify-between gap-3 py-3";
-                li.innerHTML = `
-                    <div class="min-w-0">
-                        <div class="font-semibold text-plum text-sm">${sDate.toLocaleDateString('de-DE', { month: 'short', day: 'numeric' })} – ${eDate.toLocaleDateString('de-DE', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-                        <div class="text-xs text-slate-500 mt-0.5">Blutung: ${duration} Tage · Zyklus: <span class="font-medium text-rose-600">${cycleText}</span></div>
-                    </div>
-                    <button onclick="deleteLog('${log.id}')" class="flex-shrink-0 inline-flex items-center justify-center w-11 h-11 text-slate-400 active:text-red-500 active:bg-red-50 rounded-xl transition-colors" aria-label="Löschen">
-                        <i data-lucide="trash-2" class="w-5 h-5"></i>
-                    </button>
-                `;
-                list.appendChild(li);
-            });
-            lucide.createIcons();
+            document.getElementById('current-date-badge').textContent = new Date().toLocaleDateString('de-DE');
         }
 
         function renderCalendar() {
             const grid = document.getElementById('calendar-days-grid');
+            if(!grid) return;
             grid.innerHTML = '';
-
             const year = currentCalendarDate.getFullYear();
             const month = currentCalendarDate.getMonth();
+            document.getElementById('calendar-month-year').textContent = new Date(year, month).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
 
-            const monthLabel = new Date(year, month).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
-            document.getElementById('calendar-month-year').textContent = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
-
-            const firstDayIndex = new Date(year, month, 1).getDay();
             const totalDays = new Date(year, month + 1, 0).getDate();
-
-            const { avgCycle, avgBleed } = getCalculatedAverages();
-
-            for (let i = 0; i < firstDayIndex; i++) {
-                const emptyCell = document.createElement('div');
-                emptyCell.className = 'h-12 sm:h-24 p-1 bg-cream/30 rounded-xl sm:rounded-2xl opacity-40';
-                grid.appendChild(emptyCell);
-            }
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
             for (let day = 1; day <= totalDays; day++) {
-                const dateObj = new Date(year, month, day);
-                const dateStr = formatDateISO(dateObj);
-
-                let isActualPeriod = false;
-                let isPredictedPeriod = false;
-                let isOvulation = false;
-                let isFertile = false;
-
-                periodLogs.forEach(log => {
-                    if (dateStr >= log.startDate && dateStr <= log.endDate) {
-                        isActualPeriod = true;
-                    }
-                });
-
-                if (!isActualPeriod && periodLogs.length > 0) {
-                    const latestLog = periodLogs[periodLogs.length - 1];
-                    const latestStart = parseDate(latestLog.startDate);
-
-                    for (let c = 1; c <= 3; c++) {
-                        const predStart = new Date(latestStart);
-                        predStart.setDate(predStart.getDate() + (avgCycle * c));
-
-                        const predEnd = new Date(predStart);
-                        predEnd.setDate(predEnd.getDate() + avgBleed - 1);
-
-                        const predStartStr = formatDateISO(predStart);
-                        const predEndStr = formatDateISO(predEnd);
-
-                        if (dateStr >= predStartStr && dateStr <= predEndStr) {
-                            isPredictedPeriod = true;
-                        }
-
-                        const ovuDate = new Date(predStart);
-                        ovuDate.setDate(ovuDate.getDate() - 14);
-                        const ovuStr = formatDateISO(ovuDate);
-
-                        const fertileStart = new Date(ovuDate);
-                        fertileStart.setDate(fertileStart.getDate() - 4);
-                        const fertileEnd = new Date(ovuDate);
-                        fertileEnd.setDate(fertileEnd.getDate() + 1);
-
-                        if (dateStr === ovuStr) isOvulation = true;
-                        if (dateObj >= fertileStart && dateObj <= fertileEnd) isFertile = true;
-                    }
-                }
-
-                if (!isActualPeriod && !isPredictedPeriod && periodLogs.length > 0) {
-                    periodLogs.forEach(log => {
-                        const logStart = parseDate(log.startDate);
-                        const ovuDate = new Date(logStart);
-                        ovuDate.setDate(ovuDate.getDate() + avgCycle - 14);
-
-                        const ovuStr = formatDateISO(ovuDate);
-                        const fertileStart = new Date(ovuDate);
-                        fertileStart.setDate(fertileStart.getDate() - 4);
-                        const fertileEnd = new Date(ovuDate);
-                        fertileEnd.setDate(fertileEnd.getDate() + 1);
-
-                        if (dateStr === ovuStr) isOvulation = true;
-                        if (dateObj >= fertileStart && dateObj <= fertileEnd) isFertile = true;
-                    });
-                }
-
-                const dayCell = document.createElement('div');
-                let cellStyle = "h-12 sm:h-24 p-1 sm:p-2 rounded-xl sm:rounded-2xl border transition-all flex flex-col items-center sm:items-stretch justify-center sm:justify-between ";
-
-                const isToday = dateObj.getTime() === today.getTime();
-                if (isToday) {
-                    cellStyle += "ring-2 ring-plum font-bold ";
-                }
-
-                if (isActualPeriod) {
-                    cellStyle += "bg-rose-500 text-white border-rose-600 shadow-md shadow-rose-200 ";
-                } else if (isPredictedPeriod) {
-                    cellStyle += "bg-rose-100 text-rose-800 border-rose-300 border-dashed ";
-                } else if (isOvulation) {
-                    cellStyle += "bg-purple-600 text-white border-purple-700 shadow-md shadow-purple-200 ";
-                } else if (isFertile) {
-                    cellStyle += "bg-purple-50 text-purple-900 border-purple-200 ";
-                } else {
-                    cellStyle += "bg-white text-slate-700 border-slate-100 hover:border-rose-200 ";
-                }
-
-                dayCell.className = cellStyle;
-                dayCell.innerHTML = `
-                    <div class="flex items-center justify-center sm:justify-between">
-                        <span class="text-sm font-semibold">${day}</span>
-                        ${isToday ? '<span class="hidden sm:inline text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded bg-white/20">Heute</span>' : ''}
-                    </div>
-                    ${isToday ? '<span class="sm:hidden text-[8px] leading-none uppercase font-extrabold">Heute</span>' : ''}
-                    <div class="hidden sm:block text-[10px] font-medium leading-tight">
-                        ${isActualPeriod ? 'Periode' : ''}
-                        ${isPredictedPeriod ? 'Prognose' : ''}
-                        ${isOvulation ? 'Eisprung' : ''}
-                        ${!isOvulation && isFertile ? 'Fruchtbar' : ''}
-                    </div>
-                `;
-
-                grid.appendChild(dayCell);
+                const dateStr = formatDateISO(new Date(year, month, day));
+                const isPeriod = periodLogs.some(l => dateStr >= l.startDate && dateStr <= l.endDate);
+                const cell = document.createElement('div');
+                cell.className = `h-16 p-2 rounded-2xl border flex flex-col justify-between ${isPeriod ? 'bg-rose-500 text-white font-bold' : 'bg-white text-slate-700'}`;
+                cell.innerHTML = `<span>${day}</span>${isPeriod ? '<span class="text-[9px]">Periode</span>' : ''}`;
+                grid.appendChild(cell);
             }
         }
 
@@ -953,379 +236,19 @@
 
         function initChart() {
             const ctx = document.getElementById('cycleChart').getContext('2d');
-            const isSmallScreen = window.matchMedia('(max-width: 639px)').matches;
-
             cycleChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: [],
-                    datasets: [
-                        {
-                            label: 'Zykluslänge (Tage)',
-                            data: [],
-                            borderColor: '#f43f5e',
-                            backgroundColor: 'rgba(244, 63, 94, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.35,
-                            pointBackgroundColor: '#e11d48',
-                            pointRadius: isSmallScreen ? 4 : 6,
-                            pointHoverRadius: isSmallScreen ? 7 : 8,
-                            pointHitRadius: 20
-                        },
-                        {
-                            label: 'Unterer Normbereich (21 T.)',
-                            data: [],
-                            borderColor: '#cbd5e1',
-                            borderWidth: 1.5,
-                            borderDash: [5, 5],
-                            pointRadius: 0,
-                            fill: false
-                        },
-                        {
-                            label: 'Oberer Normbereich (35 T.)',
-                            data: [],
-                            borderColor: '#cbd5e1',
-                            borderWidth: 1.5,
-                            borderDash: [5, 5],
-                            pointRadius: 0,
-                            fill: false
-                        }
-                    ]
+                    labels: ['Juli', 'Aug', 'Sept'],
+                    datasets: [{ label: 'Zykluslänge (Tage)', data: [28, 29, 27], borderColor: '#f43f5e', fill: true, backgroundColor: 'rgba(244,63,94,0.1)' }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                font: { family: 'Plus Jakarta Sans', size: isSmallScreen ? 10 : 12 },
-                                boxWidth: isSmallScreen ? 10 : 40,
-                                padding: isSmallScreen ? 8 : 10
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: '#4A2E35',
-                            padding: 12,
-                            titleFont: { family: 'Plus Jakarta Sans', size: 13 },
-                            bodyFont: { family: 'Plus Jakarta Sans', size: 12 }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            min: 15,
-                            max: 45,
-                            grid: { color: '#f1f5f9' },
-                            title: { display: !isSmallScreen, text: 'Tage', font: { family: 'Plus Jakarta Sans', size: 12 } }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { maxRotation: 0, autoSkip: true, font: { size: isSmallScreen ? 10 : 12 } }
-                        }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false }
             });
-
-            updateChart();
-        }
-
-        function setTimeframe(months) {
-            selectedTimeframeMonths = months;
-
-            document.getElementById('timeframe-6m').className = months === 6
-                ? "flex-1 sm:flex-none min-h-[44px] px-4 py-2 rounded-xl transition-all bg-white text-rose-600 shadow-sm"
-                : "flex-1 sm:flex-none min-h-[44px] px-4 py-2 rounded-xl transition-all text-slate-600 hover:text-rose-600";
-
-            document.getElementById('timeframe-1y').className = months === 12
-                ? "flex-1 sm:flex-none min-h-[44px] px-4 py-2 rounded-xl transition-all bg-white text-rose-600 shadow-sm"
-                : "flex-1 sm:flex-none min-h-[44px] px-4 py-2 rounded-xl transition-all text-slate-600 hover:text-rose-600";
-
-            updateChart();
-        }
-
-        function updateChart() {
-            if (!cycleChartInstance) return;
-
-            const cutoffDate = new Date();
-            cutoffDate.setMonth(cutoffDate.getMonth() - selectedTimeframeMonths);
-
-            const filteredLogs = periodLogs.filter(log => parseDate(log.startDate) >= cutoffDate);
-
-            const labels = [];
-            const cycleLengths = [];
-
-            for (let i = 1; i < filteredLogs.length; i++) {
-                const prevStart = parseDate(filteredLogs[i - 1].startDate);
-                const currStart = parseDate(filteredLogs[i].startDate);
-                const diffDays = Math.round((currStart - prevStart) / (1000 * 60 * 60 * 24));
-
-                labels.push(currStart.toLocaleDateString('de-DE', { month: 'short', year: '2-digit' }));
-                cycleLengths.push(diffDays);
-            }
-
-            const lowerBound = new Array(labels.length).fill(21);
-            const upperBound = new Array(labels.length).fill(35);
-
-            cycleChartInstance.data.labels = labels;
-            cycleChartInstance.data.datasets[0].data = cycleLengths;
-            cycleChartInstance.data.datasets[1].data = lowerBound;
-            cycleChartInstance.data.datasets[2].data = upperBound;
-
-            cycleChartInstance.update();
-
-            const { avgCycle, avgBleed, variation } = getCalculatedAverages();
-            document.getElementById('chart-avg-length').textContent = `${avgCycle} Tage`;
-            document.getElementById('chart-avg-bleed').textContent = `${avgBleed} Tage`;
-            document.getElementById('chart-variation').textContent = `±${variation} Tage`;
-            document.getElementById('chart-regularity-text').textContent = variation <= 2 ? 'Sehr regelmäßig' : (variation <= 4 ? 'Mäßige Regelmäßigkeit' : 'Unregelmäßig');
-        }
-
-        const NUTRITION_DATA_DE = {
-            menstruation: {
-                title: "Menstruationsphase (Tage 1–5)",
-                subtitle: "Schwerpunkt: Eisenaufnahme, Wärme & Entzündungshemmung",
-                bannerBg: "bg-rose-50",
-                badgeColor: "bg-rose-500 text-white",
-                nutrients: [
-                    { name: "Eisen & Vitamin C", purpose: "Gleicht den Blutverlust aus und beugt Müdigkeit vor." },
-                    { name: "Magnesium", purpose: "Entspannt die Gebärmutter- und Muskelmuskulatur bei Krämpfen." },
-                    { name: "Omega-3-Fettsäuren", purpose: "Wirken natürlich entzündungshemmend gegen Prostaglandin-Schmerzen." }
-                ],
-                foods: [
-                    { category: "Eisenquellen", items: "Spinat, Linsen, Kichererbsen, mageres Fleisch, Kürbiskerne, Quinoa." },
-                    { category: "Früchte & Vitamin C", items: "Orangen, Erdbeeren, Beeren, Paprika, Kiwi, Brokkoli." },
-                    { category: "Wärmendes & Wohlbefinden", items: "Dunkle Schokolade (ab 70%), Ingwertee, Kamillentee, warme Suppen." }
-                ],
-                avoid: "Stark verarbeitete Lebensmittel, zu viel Salz und übermäßiger Kaffee (können Krämpfe verstärken)."
-            },
-            follicular: {
-                title: "Follikelphase (Tage 6–12)",
-                subtitle: "Schwerpunkt: Östrogen-Stoffwechsel, Darmgesundheit & Energie",
-                bannerBg: "bg-amber-50",
-                badgeColor: "bg-amber-500 text-white",
-                nutrients: [
-                    { name: "Probiotika & Ballaststoffe", purpose: "Fördern das Darmgleichgewicht zum Abbau überschüssigen Östrogens." },
-                    { name: "Zink & Vitamin E", purpose: "Unterstützen die gesunde Entwicklung der Eibläschen (Follikel)." },
-                    { name: "Leichtes Eiweiß", purpose: "Sichert kontinuierliche Energie bei steigender Stoffwechselrate." }
-                ],
-                foods: [
-                    { category: "Kreuzblütler-Gemüse", items: "Brokkoli, Blumenkohl, Sauerkraut, Kimchi, Karotten, Zucchini." },
-                    { category: "Proteine & Samen", items: "Hähnchenbrust, Eier, Keimlinge, Haferflocken, Leinsamen." },
-                    { category: "Hydratation", items: "Kokoswasser, grüner Tee, Zitrus-Aufgüsse." }
-                ],
-                avoid: "Sehr schwere oder fettige Mahlzeiten, die die Verdauung verlangsamen."
-            },
-            ovulation: {
-                title: "Eisprungphase (Tage 13–16)",
-                subtitle: "Schwerpunkt: Antioxidantien, Ballaststoffe & Gesunde Fette",
-                bannerBg: "bg-purple-50",
-                badgeColor: "bg-purple-600 text-white",
-                nutrients: [
-                    { name: "Starke Antioxidantien", purpose: "Schützen die Qualität der Eizelle und unterstützen die Leberfunktion." },
-                    { name: "Lösliche Ballaststoffe", purpose: "Helfen beim Abbau des Hormonüberschusses während des Östrogenspiegels." },
-                    { name: "Essentielle Fettsäuren", purpose: "Erhalten die Geschmeidigkeit und Qualität der Follikelflüssigkeit." }
-                ],
-                foods: [
-                    { category: "Super-Antioxidantien", items: "Himbeeren, Brombeeren, Granatapfel, frisches Blattgemüse." },
-                    { category: "Gesunde Fette", items: "Avocado, natives Olivenöl extra, Sesam, Sonnenblumenkerne." },
-                    { category: "Hochwertige Proteine", items: "Wildlachs, Quinoa, Spargel, Rosenkohl." }
-                ],
-                avoid: "Schwere raffinierte Kohlenhydrate; bevorzuge frische, rohe oder gedünstete Speisen."
-            },
-            luteal: {
-                title: "Lutealphase (Tage 17–28)",
-                subtitle: "Schwerpunkt: Progesteron-Produktion, Blutzucker-Stabilität & PMS-Linderung",
-                bannerBg: "bg-orange-50",
-                badgeColor: "bg-orange-500 text-white",
-                nutrients: [
-                    { name: "Vitamin B6", purpose: "Fördert die natürliche Progesteronsynthese und stabilisiert die Stimmung." },
-                    { name: "Magnesium & Calcium", purpose: "Reduzieren Wassereinlagerungen, Unruhe und Heißhunger auf Süßes." },
-                    { name: "Komplexe Kohlenhydrate", purpose: "Halten Serotonin- und Blutzuckerspiegel stabil." }
-                ],
-                foods: [
-                    { category: "Komplexe Kohlenhydrate", items: "Süßkartoffeln, Kürbis, brauner Reis, Haferflocken, Karotten." },
-                    { category: "Magnesium- & B6-reich", items: "Bananen, Nüsse, dunkle Schokolade, Putenfleisch, Spinat." },
-                    { category: "Entwässernde Tees", items: "Pfefferminztee, Löwenzahntee, Kamillentee." }
-                ],
-                avoid: "Alkohol, zu viel Salz (verstärkt Blähungen) und raffinierter Zucker (verursacht Stimmungsschwankungen)."
-            }
-        };
-
-        function filterNutritionPhase(phaseKey) {
-            document.querySelectorAll('.nut-tab-btn').forEach(btn => {
-                btn.className = "nut-tab-btn min-h-[44px] px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition-all bg-cream text-slate-600 hover:text-rose-600";
-            });
-            const activeBtn = document.getElementById(`nut-btn-${phaseKey}`);
-            if (activeBtn) {
-                activeBtn.className = `nut-tab-btn min-h-[44px] px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition-all ${NUTRITION_DATA_DE[phaseKey].badgeColor} shadow-md`;
-            }
-
-            renderNutritionGuide(phaseKey);
-        }
-
-        function renderNutritionGuide(phaseKey) {
-            const data = NUTRITION_DATA_DE[phaseKey];
-            const container = document.getElementById('nutrition-content-box');
-
-            let html = `
-                <div class="${data.bannerBg} rounded-2xl p-4 sm:p-6 border border-rose-100/80">
-                    <span class="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full ${data.badgeColor} inline-block mb-2">Phasenübersicht</span>
-                    <h3 class="text-2xl font-serif font-bold text-plum">${data.title}</h3>
-                    <p class="text-xs sm:text-sm text-slate-600 mt-1">${data.subtitle}</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            `;
-
-            data.nutrients.forEach(n => {
-                html += `
-                    <div class="bg-cream/60 p-4 rounded-2xl border border-rose-100/60">
-                        <div class="font-bold text-sm text-plum flex items-center gap-2">
-                            <i data-lucide="check-circle" class="w-4 h-4 text-rose-500"></i> ${n.name}
-                        </div>
-                        <p class="text-xs text-slate-500 mt-1">${n.purpose}</p>
-                    </div>
-                `;
-            });
-
-            html += `</div> <div class="bg-white border border-rose-100 rounded-2xl p-4 sm:p-6 space-y-4">
-                <h4 class="font-serif font-bold text-lg text-plum flex items-center gap-2">
-                    <i data-lucide="utensils" class="w-5 h-5 text-rose-500"></i> Empfohlene Lebensmittel
-                </h4>
-                <div class="space-y-3">`;
-
-            data.foods.forEach(f => {
-                html += `
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-blush rounded-xl border border-rose-50 gap-1 sm:gap-4">
-                        <span class="text-xs font-bold text-plum sm:w-1/3">${f.category}</span>
-                        <span class="text-xs text-slate-600 sm:w-2/3">${f.items}</span>
-                    </div>
-                `;
-            });
-
-            html += `
-                </div>
-                <div class="mt-4 pt-4 border-t border-rose-50 flex items-start gap-3 bg-amber-50/50 p-3.5 rounded-xl text-xs text-amber-900">
-                    <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
-                    <div>
-                        <strong class="font-semibold">Möglichst reduzieren:</strong> ${data.avoid}
-                    </div>
-                </div>
-            </div>`;
-
-            container.innerHTML = html;
-            lucide.createIcons();
         }
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            document.querySelectorAll('.nav-tab').forEach(btn => {
-                btn.className = "nav-tab px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 text-slate-600 hover:text-rose-600";
-            });
-            const activeNav = document.getElementById(`nav-${tabId}`);
-            if (activeNav) {
-                activeNav.className = "nav-tab px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2 bg-white text-rose-600 shadow-sm";
-            }
-
-            document.querySelectorAll('.mobile-nav-tab').forEach(btn => {
-                btn.className = "mobile-nav-tab flex-1 flex flex-col items-center justify-center min-h-[52px] py-1.5 px-1 rounded-xl text-[11px] font-semibold active:bg-rose-50 text-slate-500";
-            });
-            const activeMobileNav = document.getElementById(`mobile-nav-${tabId}`);
-            if (activeMobileNav) {
-                activeMobileNav.className = "mobile-nav-tab flex-1 flex flex-col items-center justify-center min-h-[52px] py-1.5 px-1 rounded-xl text-[11px] font-semibold active:bg-rose-50 text-rose-600";
-            }
-
-            if (tabId === 'stats') {
-                updateChart();
-            } else if (tabId === 'calendar') {
-                renderCalendar();
-            }
-        }
-
-        function openLogModal() {
-            const todayStr = formatDateISO(new Date());
-            document.getElementById('input-start-date').value = todayStr;
-            
-            const endDate = new Date();
-            endDate.setDate(endDate.getDate() + 4);
-            document.getElementById('input-end-date').value = formatDateISO(endDate);
-
-            document.getElementById('log-modal').classList.remove('hidden');
-            document.body.classList.add('no-scroll');
-        }
-
-        function closeLogModal() {
-            document.getElementById('log-modal').classList.add('hidden');
-            document.body.classList.remove('no-scroll');
-        }
-
-        function openSettingsModal() {
-            document.getElementById('input-default-cycle').value = appSettings.defaultCycleLength;
-            document.getElementById('input-default-bleed').value = appSettings.defaultBleedDuration;
-            document.getElementById('settings-modal').classList.remove('hidden');
-            document.body.classList.add('no-scroll');
-        }
-
-        function closeSettingsModal() {
-            document.getElementById('settings-modal').classList.add('hidden');
-            document.body.classList.remove('no-scroll');
-        }
-
-        document.getElementById('log-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'log-modal') closeLogModal();
-        });
-        document.getElementById('settings-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'settings-modal') closeSettingsModal();
-        });
-
-        function handleSaveLog(e) {
-            e.preventDefault();
-            const start = document.getElementById('input-start-date').value;
-            const end = document.getElementById('input-end-date').value;
-            const notes = document.getElementById('input-notes').value;
-
-            if (start > end) {
-                alert("Das Startdatum darf nicht nach dem Enddatum liegen.");
-                return;
-            }
-
-            periodLogs.push({
-                id: 'log-' + Date.now(),
-                startDate: start,
-                endDate: end,
-                notes: notes || 'Eintrag'
-            });
-
-            periodLogs.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-            saveStateToStorage();
-            refreshAllViews();
-            closeLogModal();
-        }
-
-        function deleteLog(logId) {
-            periodLogs = periodLogs.filter(l => l.id !== logId);
-            saveStateToStorage();
-            refreshAllViews();
-        }
-
-        function handleSaveSettings(e) {
-            e.preventDefault();
-            appSettings.defaultCycleLength = parseInt(document.getElementById('input-default-cycle').value, 10);
-            appSettings.defaultBleedDuration = parseInt(document.getElementById('input-default-bleed').value, 10);
-            saveStateToStorage();
-            refreshAllViews();
-            closeSettingsModal();
-        }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch((err) => console.warn('Offline-Modus fehlgeschlagen:', err));
-            });
         }
     </script>
 </body>
